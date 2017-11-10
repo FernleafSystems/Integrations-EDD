@@ -1,0 +1,23 @@
+<?php
+
+namespace FernleafSystems\WordPress\Integrations\Edd\Utilities;
+
+/**
+ * Class GetSubscriptionsFromPaymentId
+ * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
+ */
+class GetSubscriptionsFromPaymentId {
+
+	/**
+	 * @param int $nPaymentId
+	 * @return \EDD_Subscription[]
+	 */
+	public function retrieve( $nPaymentId ) {
+		return ( new \EDD_Subscriptions_DB() )
+			->get_subscriptions(
+				array(
+					'parent_payment_id' => $nPaymentId
+				)
+			);
+	}
+}

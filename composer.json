@@ -1,0 +1,28 @@
+{
+  "name":         "fernleafsystems/wordpress-integrations-edd-utilities",
+  "description":  "Provides useful helper classes for Easy Digital Downloads",
+  "authors":      [
+	{
+	  "name":     "Paul Goodchild",
+	  "email":    "paul@paulgoodchild.me",
+	  "homepage": "https://paulgoodchild.me"
+	}
+  ],
+  "license":      "MIT",
+  "keywords":     [
+	"Easy Digital Downloads"
+  ],
+  "repositories": [
+  ],
+  "require":      {
+	"php":                       ">=5.4.0",
+	"fernleafsystems/utilities": "^1.0"
+  },
+  "require-dev":  {
+  },
+  "autoload":     {
+	"psr-4": {
+	  "FernleafSystems\\Wordpress\\Integrations\\Edd\\Utilities\\": "src"
+	}
+  }
+}
