@@ -1,6 +1,6 @@
 <?php
 
-namespace FernleafSystems\WordPress\Integrations\Edd\Utilities\Entities;
+namespace FernleafSystems\Integrations\Edd\Entities;
 
 use FernleafSystems\Utilities\Data\Adapter\StdClassAdapter;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace FernleafSystems\WordPress\Integrations\Edd\Utilities;
+namespace FernleafSystems\Integrations\Edd\Utilities;
 
-use FernleafSystems\WordPress\Integrations\Edd\Utilities\Entities\CartItemVo;
+use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 
 /**
  * Class GetCartItemsFromTransactionId
