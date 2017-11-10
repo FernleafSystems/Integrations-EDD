@@ -34,6 +34,13 @@ class CartItemVo {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getName() {
+		return $this->getStringParam( 'name' );
+	}
+
+	/**
 	 * @return float
 	 */
 	public function getPrice() {
@@ -69,6 +76,14 @@ class CartItemVo {
 	}
 
 	/**
+	 * To get the Percentage out of 100, multiply by 100
+	 * @return float a decimal value.
+	 */
+	public function getTaxRate() {
+		return ( $this->getTax() > 0 ) ? ( $this->getTax()/$this->getSubtotal() ) : 0;
+	}
+
+	/**
 	 * @return int
 	 */
 	public function getParentPaymentId() {
@@ -86,8 +101,8 @@ class CartItemVo {
 	 * @param int $nId
 	 * @return $this
 	 */
-	public function setParentPaymentId( $nId  ) {
-		return $this->setParam( 'parent_payment_id', $nId  );
+	public function setParentPaymentId( $nId ) {
+		return $this->setParam( 'parent_payment_id', $nId );
 	}
 
 	/**
@@ -95,6 +110,6 @@ class CartItemVo {
 	 * @return $this
 	 */
 	public function setParentSubscriptionId( $nId ) {
-		return $this->setParam( 'parent_subscription_id', $nId  );
+		return $this->setParam( 'parent_subscription_id', $nId );
 	}
 }
