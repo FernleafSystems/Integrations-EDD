@@ -21,6 +21,7 @@ class GetCartItemsFromTransactionId {
 
 		$aCartItems = array();
 
+		$nSubId = 0;
 		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sTransactionId );
 		if ( !empty( $nPaymentId ) ) { // must be the first purchase of a subscription.
 			$aCartItems = ( new \EDD_Payment( $nPaymentId ) )->cart_details;
@@ -31,6 +32,7 @@ class GetCartItemsFromTransactionId {
 				throw new \Exception( sprintf( 'Could not find either Payment or Subscription with Txn ID "%s"', $sTransactionId ) );
 			}
 
+			$nSubId = $oSub->id;
 			$oPayment = new \EDD_Payment( $oSub->get_original_payment_id() );
 			foreach ( $oPayment->cart_details as $aCartItem ) {
 				if ( $aCartItem[ 'id' ] == $oSub->product_id ) {
@@ -39,11 +41,12 @@ class GetCartItemsFromTransactionId {
 			}
 		}
 
-		return array_map(
-			function ( $aItem ) {
-				return ( new CartItemVo() )->applyFromArray( $aItem );
-			},
-			$aCartItems
-		);
+		foreach ( $aCartItems as $nKey => $aCartItem ) {
+			$aCartItems[ $nKey ] = ( new CartItemVo() )
+				->applyFromArray( $aCartItem )
+				->setParentPaymentId( $nPaymentId )
+				->setParentSubscriptionId( $nSubId );
+		}
+		return $aCartItems;
 	}
 }

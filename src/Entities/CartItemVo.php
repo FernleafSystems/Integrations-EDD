@@ -22,8 +22,29 @@ class CartItemVo {
 	/**
 	 * @return float
 	 */
+	public function getDiscount() {
+		return $this->getParam( 'discount' );
+	}
+
+	/**
+	 * @return float
+	 */
 	public function getItemPrice() {
 		return $this->getParam( 'item_price' );
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getPrice() {
+		return $this->getParam( 'price' );
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getPriceInOrderCurrency() {
+		return $this->getParam( 'price_order_currency' );
 	}
 
 	/**
@@ -31,13 +52,6 @@ class CartItemVo {
 	 */
 	public function getQuantity() {
 		return $this->getParam( 'quantity' );
-	}
-
-	/**
-	 * @return float
-	 */
-	public function getDiscount() {
-		return $this->getParam( 'discount' );
 	}
 
 	/**
@@ -55,16 +69,32 @@ class CartItemVo {
 	}
 
 	/**
-	 * @return float
+	 * @return int
 	 */
-	public function getPrice() {
-		return $this->getParam( 'price' );
+	public function getParentPaymentId() {
+		return $this->getParam( 'parent_payment_id' );
 	}
 
 	/**
-	 * @return float
+	 * @return int
 	 */
-	public function getPriceInOrderCurrency() {
-		return $this->getParam( 'price_order_currency' );
+	public function getParentSubscriptionId() {
+		return $this->getParam( 'parent_subscription_id' );
+	}
+
+	/**
+	 * @param int $nId
+	 * @return $this
+	 */
+	public function setParentPaymentId( $nId  ) {
+		return $this->setParam( 'parent_payment_id', $nId  );
+	}
+
+	/**
+	 * @param int $nId
+	 * @return $this
+	 */
+	public function setParentSubscriptionId( $nId ) {
+		return $this->setParam( 'parent_subscription_id', $nId  );
 	}
 }
