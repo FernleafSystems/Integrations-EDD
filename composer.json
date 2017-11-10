@@ -1,5 +1,5 @@
 {
-  "name":         "fernleafsystems/wordpress-integrations-edd-utilities",
+  "name":         "fernleafsystems/integrations-edd",
   "description":  "Provides useful helper classes for Easy Digital Downloads",
   "authors":      [
 	{
@@ -22,7 +22,7 @@
   },
   "autoload":     {
 	"psr-4": {
-	  "FernleafSystems\\Wordpress\\Integrations\\Edd\\Utilities\\": "src"
+	  "FernleafSystems\\Integrations\\Edd\\": "src"
 	}
   }
 }

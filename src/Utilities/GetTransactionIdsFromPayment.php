@@ -1,6 +1,6 @@
 <?php
 
-namespace FernleafSystems\WordPress\Integrations\Edd\Utilities;
+namespace FernleafSystems\Integrations\Edd\Utilities;
 
 /**
  * Class GetTransactionIdsFromPayment
