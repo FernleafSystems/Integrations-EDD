@@ -15,7 +15,7 @@ class GetTransactionIdsFromPayment {
 	public function retrieve( $oPayment ) {
 
 		$sTxnId = $oPayment->transaction_id;
-		if ( empty( $sTxnId ) ) {
+		if ( empty( $sTxnId ) || ( $sTxnId == $oPayment->ID ) ) {
 			$aIds = array_map(
 				function ( $oSub ) {
 					/** @var \EDD_Subscription $oSub */

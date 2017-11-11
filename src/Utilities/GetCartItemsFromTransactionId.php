@@ -23,6 +23,7 @@ class GetCartItemsFromTransactionId {
 
 		$nSubId = 0;
 		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sTransactionId );
+		
 		if ( !empty( $nPaymentId ) ) { // must be the first purchase of a subscription.
 			$aCartItems = ( new \EDD_Payment( $nPaymentId ) )->cart_details;
 		}
@@ -33,8 +34,9 @@ class GetCartItemsFromTransactionId {
 			}
 
 			$nSubId = $oSub->id;
-			$oPayment = new \EDD_Payment( $oSub->get_original_payment_id() );
-			foreach ( $oPayment->cart_details as $aCartItem ) {
+			$nPaymentId = $oSub->get_original_payment_id();
+
+			foreach ( ( new \EDD_Payment( $nPaymentId ) )->cart_details as $aCartItem ) {
 				if ( $aCartItem[ 'id' ] == $oSub->product_id ) {
 					$aCartItems[] = $aCartItem;
 				}
