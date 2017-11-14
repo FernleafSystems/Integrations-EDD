@@ -1,12 +1,12 @@
 <?php
 
-namespace FernleafSystems\Integrations\Edd\Utilities;
+namespace FernleafSystems\Integrations\Edd\Utilities\Payments;
 
 /**
  * Class ProcessAllPayments
  * @package FernleafSystems\Integrations\Edd\Utilities
  */
-class ProcessAllPayments {
+class ProcessAll {
 
 	/**
 	 * @param callable $cProcessFunction
