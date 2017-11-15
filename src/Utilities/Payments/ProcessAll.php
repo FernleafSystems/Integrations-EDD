@@ -12,7 +12,7 @@ class ProcessAll {
 	 * @param callable $cProcessFunction
 	 * @param array    $aQueryOptions
 	 */
-	public function fix( $cProcessFunction, $aQueryOptions = array() ) {
+	public function process( $cProcessFunction, $aQueryOptions = array() ) {
 
 		$aQueryOptions = array_merge(
 			array(
