@@ -19,7 +19,7 @@ class GetTransactionIdFromCartItem {
 
 		$oPayment = new \EDD_Payment( $oCartItem->getParentPaymentId() );
 
-		if ( !empty( $oPayment->transaction_id ) ) {
+		if ( !empty( $oPayment->transaction_id ) && ( $oPayment->transaction_id != $oPayment->ID ) ) {
 			$sTransactionId = $oPayment->transaction_id;
 		}
 		else {
