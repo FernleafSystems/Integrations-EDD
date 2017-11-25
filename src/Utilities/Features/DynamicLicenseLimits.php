@@ -62,18 +62,17 @@ class DynamicLicenseLimits {
 						if ( isset( $aOptions[ 'dynamic_license_limit' ] ) ) {
 							$nLimit = (int)$aOptions[ 'dynamic_license_limit' ];
 
-							if ( $nLimit != $oLicense->license_limit() ) {
+							if ( $nLimit > 0 && $nLimit != $oLicense->license_limit() ) {
 								$oLicense->update_meta( 'activation_limit', $nLimit );
 								( new \EDD_Payment( $nPaymentId ) )
-									->add_note( 'License Activation Limit was automatically adjust to '.$nLimit );
+									->add_note( 'License Activation Limit automatically adjusted to '.$nLimit );
 							}
 						}
+						break( 2 );
 					}
 				}
 			}
 		}
-
-		die();
 	}
 
 	public function printJsHandler() {
