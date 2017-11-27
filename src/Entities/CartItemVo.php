@@ -80,7 +80,8 @@ class CartItemVo {
 	 * @return float a decimal value.
 	 */
 	public function getTaxRate() {
-		return ( $this->getTax() > 0 ) ? ( $this->getTax()/$this->getSubtotal() ) : 0;
+		$nTaxRate = ( $this->getTax() > 0 ) ? ( $this->getTax()/$this->getSubtotal() ) : 0;
+		return ( $nTaxRate == 0 ) ? $nTaxRate : round( $nTaxRate, 3 );
 	}
 
 	/**
