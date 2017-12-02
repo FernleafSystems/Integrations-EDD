@@ -60,14 +60,14 @@ class EddCustomerToFreeagentContact {
 		$oCustomer = $this->getCustomer();
 		$aNames = explode( ' ', $oCustomer->name, 2 );
 		if ( !isset( $aNames[ 1 ] ) ) {
-			$aNames[ 1 ] = '';
+			$aNames[ 1 ] = 'Surname-Unknown';
 		}
 
 		$oContact = ( new Entities\Contacts\Create() )
 			->setConnection( $this->getConnection() )
 			->setFirstName( $aNames[ 0 ] )
 			->setLastName( $aNames[ 1 ] )
-			->sendRequestWithVoResponse();
+			->create();
 
 		$oCustomer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $oContact->getId() );
 
@@ -118,7 +118,7 @@ class EddCustomerToFreeagentContact {
 			$this->oContact = ( new Entities\Contacts\Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID ) )
-				->sendRequestWithVoResponse();
+				->retrieve();
 		}
 		return $this->oContact;
 	}
