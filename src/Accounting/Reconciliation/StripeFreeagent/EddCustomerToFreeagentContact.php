@@ -84,7 +84,11 @@ class EddCustomerToFreeagentContact {
 		$sPaymentCountry = $this->getCountryNameFromIso2Code( $oPayment->address[ 'country' ] );
 		$aUserInfo = edd_get_payment_meta_user_info( $oPayment->ID );
 
+		$oOriginalContact = $this->getContact();
+
 		$oContact = ( new Entities\Contacts\Update() )
+			->setFirstName( $oOriginalContact->getFirstName() )
+			->setLastName( $oOriginalContact->getLastName() )
 			->setConnection( $this->getConnection() )
 			->setEntityId( $this->getContact()->getId() )
 			->setAddress_Line( $aUserInfo[ 'line1' ], 1 )
