@@ -82,9 +82,16 @@ class DynamicLicenseLimits {
 			jQuery(document.body).on("change", ".edd-item-dynamic_license_quantity", function(){
 				var $oThis = jQuery( this );
 				$oThis.prop( "disabled", true );
+				var nValue = $oThis.val();
+				nValue = nValue.replace( /[^0-9]/g, "" );
+				if ( nValue.length === 0 || nValue === "0" ) {
+					nValue = 1;
+				}
+				$oThis.val( nValue );
+				
 				var postData = {
 					action: "update_dlq",
-					quantity: $oThis.val(),
+					quantity: nValue,
 					download_id: $oThis.data("dld-id")
 				};
 				
@@ -120,6 +127,9 @@ class DynamicLicenseLimits {
 		if ( $this->isEnabledDynamicLicenseLimits( $nDownloadId ) ) {
 			$nItemPos = EDD()->cart->get_item_position( $nDownloadId );
 			if ( $nItemPos !== false ) {
+				if ( $nQuantity < 1 ) {
+					$nQuantity = 1;
+				}
 				EDD()->cart->contents[ $nItemPos ][ 'options' ][ 'dynamic_license_limit' ] = $nQuantity;
 				EDD()->cart->update_cart();
 			}
@@ -151,7 +161,7 @@ class DynamicLicenseLimits {
 
 		if ( $this->isEnabledDynamicLicenseLimits( $aItem[ 'id' ] ) ) {
 			$nLicQuantity = $aItem[ 'options' ][ 'dynamic_license_limit' ];
-			echo '<input type="number" min="1" step="1"
+			echo '<input type="text" min="1" step="1"
 			name="edd-cart-download-dynamic_license_quantity"
 			data-dld-id="'.$aItem[ 'id' ].'" style="max-width: 110px;"
 			data-key="dynamic_license_quanity" class="edd-input edd-item-dynamic_license_quantity"
