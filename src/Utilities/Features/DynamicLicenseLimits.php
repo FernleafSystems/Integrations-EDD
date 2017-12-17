@@ -22,9 +22,9 @@ class DynamicLicenseLimits {
 		add_action( 'edd_checkout_table_body_first', array( $this, 'printLicenseLimitsQuantitiesInput' ) );
 
 		// add the default dynamic license limit (1) when item is added to cart
-		add_action( 'edd_add_to_cart_item', array( $this, 'filterAddToCart' ) );
+		add_filter( 'edd_add_to_cart_item', array( $this, 'filterAddToCart' ) );
 		// adjust the item price to take account the chosen dynamic license limit
-		add_action( 'edd_cart_item_price', array( $this, 'filterCartItemPrice' ), 100, 3 );
+		add_filter( 'edd_cart_item_price', array( $this, 'filterCartItemPrice' ), 100, 3 );
 
 		add_action( 'wp_ajax_update_dlq', array( $this, 'ajax_update_cart_item_dynamic_license_limits' ) );
 		add_action( 'wp_ajax_nopriv_update_dlq', array( $this, 'ajax_update_cart_item_dynamic_license_limits' ) );
