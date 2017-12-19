@@ -1,6 +1,6 @@
 <?php
 
-namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreeagent;
+namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
@@ -45,8 +45,8 @@ class EddCartItemToFreeagentInvoice {
 			->setComments(
 				serialize(
 					array(
-						'payment_id'       => $oLocalPayment->ID,
-						'stripe_charge_id' => ( new GetTransactionIdFromCartItem() )->retrieve( $oCartItem )
+						'payment_id'        => $oLocalPayment->ID,
+						'gateway_charge_id' => ( new GetTransactionIdFromCartItem() )->retrieve( $oCartItem )
 					)
 				)
 			)
@@ -54,7 +54,7 @@ class EddCartItemToFreeagentInvoice {
 
 		if ( $this->isPaymentEuVatMossRegion() ) {
 			$oInvoiceCreator->setEcPlaceOfSupply( $oContact->getCountry() )
-						   ->setEcStatusVatMoss();
+							->setEcStatusVatMoss();
 		}
 		else {
 			$oInvoiceCreator->setEcStatusNonEc();

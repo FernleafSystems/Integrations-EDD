@@ -13,24 +13,24 @@ class GetCartItemsFromTransactionId {
 	/**
 	 * You receive an array of Cart Items, but actually it should only be 1 item if all you have
 	 * are subscriptions.
-	 * @param string $sTransactionId
+	 * @param string $sGatewayTxnId
 	 * @return CartItemVo[]
 	 * @throws \Exception
 	 */
-	public function retrieve( $sTransactionId ) {
+	public function retrieve( $sGatewayTxnId ) {
 
 		$aCartItems = array();
 
 		$nSubId = 0;
-		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sTransactionId );
+		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sGatewayTxnId );
 		
 		if ( !empty( $nPaymentId ) ) { // must be the first purchase of a subscription.
 			$aCartItems = ( new \EDD_Payment( $nPaymentId ) )->cart_details;
 		}
 		else { // extract the particular cart item subscription
-			$oSub = ( new GetSubscriptionsFromTransactionId() )->retrieve( $sTransactionId );
+			$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sGatewayTxnId );
 			if ( is_null( $oSub ) ) {
-				throw new \Exception( sprintf( 'Could not find either Payment or Subscription with Txn ID "%s"', $sTransactionId ) );
+				throw new \Exception( sprintf( 'Could not find either Payment or Subscription with Txn ID "%s"', $sGatewayTxnId ) );
 			}
 
 			$nSubId = $oSub->id;

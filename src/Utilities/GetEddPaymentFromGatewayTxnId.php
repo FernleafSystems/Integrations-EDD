@@ -3,10 +3,10 @@
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
 /**
- * Class GetEddPaymentFromTransactionId
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
+ * Class GetEddPaymentFromGatewayTxnId
+ * @package FernleafSystems\Integrations\Edd\Utilities
  */
-class GetEddPaymentFromTransactionId {
+class GetEddPaymentFromGatewayTxnId {
 
 	/**
 	 * @param string $sTransactionId
@@ -20,7 +20,7 @@ class GetEddPaymentFromTransactionId {
 			$oPayment = new \EDD_Payment( $nPaymentId );
 		}
 		else {
-			$oSub = ( new GetSubscriptionsFromTransactionId() )->retrieve( $sTransactionId );
+			$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTransactionId );
 			if ( !is_null( $oSub ) ) {
 				$oPayment = new \EDD_Payment( $oSub->get_original_payment_id() );
 			}

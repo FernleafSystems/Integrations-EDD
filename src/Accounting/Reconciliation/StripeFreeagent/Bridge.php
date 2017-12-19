@@ -4,6 +4,8 @@ namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreea
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
+use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\EddCartItemToFreeagentInvoice;
+use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\EddCustomerToFreeagentContact;
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 use FernleafSystems\Integrations\Edd\Utilities;
 use FernleafSystems\Integrations\Stripe_Freeagent\Consumers\FreeagentConfigVoConsumer;
@@ -51,7 +53,7 @@ class Bridge implements BridgeInterface {
 	 */
 	public function createFreeagentInvoiceFromStripeBalanceTxn( $sChargeTxnId ) {
 		return $this->createFreeagentInvoiceFromEddPaymentCartItem(
-			$this->getCartItemDetailsFromStripeBalanceTxn( $sChargeTxnId )
+			$this->getCartItemDetailsFromGatewayTxn( $sChargeTxnId )
 		);
 	}
 
@@ -112,15 +114,15 @@ class Bridge implements BridgeInterface {
 	}
 
 	/**
-	 * @param string $sStripeChargeTxnId
+	 * @param string $sGatewayTxnId
 	 * @return CartItemVo
 	 * @throws \Exception
 	 */
-	protected function getCartItemDetailsFromStripeBalanceTxn( $sStripeChargeTxnId ) {
+	protected function getCartItemDetailsFromGatewayTxn( $sGatewayTxnId ) {
 		$aCartItems = ( new Utilities\GetCartItemsFromTransactionId() )
-			->retrieve( $sStripeChargeTxnId );
+			->retrieve( $sGatewayTxnId );
 		if ( count( $aCartItems ) != 1 ) { // TODO - if we offer non-subscription items!
-			throw new \Exception( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $sStripeChargeTxnId ) );
+			throw new \Exception( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $sGatewayTxnId ) );
 		}
 		return array_pop( $aCartItems );
 	}
@@ -147,7 +149,7 @@ class Bridge implements BridgeInterface {
 	 * @return \EDD_Payment|null
 	 */
 	private function getEddPaymentFromStripeBalanceTxn( $oBalTxn ) {
-		return ( new Utilities\GetEddPaymentFromTransactionId() )->retrieve( $oBalTxn->source );
+		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $oBalTxn->source );
 	}
 
 	/**

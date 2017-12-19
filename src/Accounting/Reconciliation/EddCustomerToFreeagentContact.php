@@ -1,6 +1,6 @@
 <?php
 
-namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreeagent;
+namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
