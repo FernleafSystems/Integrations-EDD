@@ -6,8 +6,8 @@ use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 use FernleafSystems\Integrations\Edd\Utilities\GetTransactionIdFromCartItem;
+use FernleafSystems\Integrations\Freeagent\Consumers\FreeagentConfigVoConsumer;
 use FernleafSystems\Integrations\Stripe_Freeagent\Consumers\ContactVoConsumer;
-use FernleafSystems\Integrations\Stripe_Freeagent\Consumers\FreeagentConfigVoConsumer;
 
 /**
  * Class EddCartItemToFreeagentInvoice
