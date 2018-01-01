@@ -76,6 +76,14 @@ class CartItemVo {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getTotal() {
+		return $this->getPrice();
+//		return $this->getSubtotal() + $this->getTax();
+	}
+
+	/**
 	 * To get the Percentage out of 100, multiply by 100
 	 * @return float a decimal value.
 	 */

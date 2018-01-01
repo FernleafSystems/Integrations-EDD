@@ -5,17 +5,22 @@ namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\ApiWrappers\Freeagent\Entities\Invoices\InvoiceVO;
+use FernleafSystems\Integrations\Edd\Consumers\EddPaymentConsumer;
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 use FernleafSystems\Integrations\Edd\Utilities;
 use FernleafSystems\Integrations\Freeagent\Consumers\FreeagentConfigVoConsumer;
 use FernleafSystems\Integrations\Freeagent\DataWrapper\ChargeVO;
-use FernleafSystems\Integrations\Freeagent\Reconciliation\Bridge\BridgeInterface;
 
-class CommonBridge implements BridgeInterface {
+/**
+ * Implements the FernleafSystems\Integrations\Freeagent\Reconciliation\Bridge\BridgeInterface
+ * Trait CommonEddBridge
+ * @package FernleafSystems\Integrations\Edd\Accounting\Reconciliation
+ */
+trait CommonEddBridge {
 
 	use ConnectionConsumer,
+		EddPaymentConsumer,
 		FreeagentConfigVoConsumer;
-	const KEY_FREEAGENT_INVOICE_IDS = 'freeagent_invoice_ids';
 
 	public function __construct() {
 		EDD_Recurring(); // initializes anything that's required
@@ -29,15 +34,6 @@ class CommonBridge implements BridgeInterface {
 	public function createFreeagentContact( $oCharge, $bUpdateOnly = false ) {
 		$oPayment = $this->getEddPaymentFromCharge( $oCharge );
 		return $this->createFreeagentContactFromPayment( $oPayment, $bUpdateOnly );
-	}
-
-	/**
-	 * @param ChargeVO $oCharge
-	 * @return InvoiceVO
-	 * @throws \Exception
-	 */
-	public function createFreeagentInvoice( $oCharge ) {
-		return $this->createFreeagentInvoiceFromChargeId( $oCharge->getId() );
 	}
 
 	/**
@@ -82,6 +78,7 @@ class CommonBridge implements BridgeInterface {
 	}
 
 	/**
+	 * TODO : Be able to replace cartiem with ChargeVO so we can abstract this.
 	 * First attempts to locate a previously created invoice for this Payment.
 	 * @param CartItemVo $oCartItem
 	 * @return Entities\Invoices\InvoiceVO
@@ -192,5 +189,27 @@ class CommonBridge implements BridgeInterface {
 	 */
 	public function verifyInternalPaymentLink( $oCharge ) {
 		return !is_null( $this->getEddPaymentFromCharge( $oCharge ) );
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected function isPaymentEuVatMossRegion() {
+		$sPaymentCountry = $this->getEddPaymentFromCharge()->address[ 'country' ];
+		return ( $sPaymentCountry != 'GB' &&
+				 array_key_exists( $sPaymentCountry, $this->getTaxCountriesRates() ) );
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getTaxCountriesRates() {
+		$aCountriesToRates = array();
+		foreach ( edd_get_tax_rates() as $aCountryRate ) {
+			if ( !empty( $aCountryRate[ 'country' ] ) ) {
+				$aCountriesToRates[ $aCountryRate[ 'country' ] ] = $aCountryRate[ 'rate' ];
+			}
+		}
+		return $aCountriesToRates;
 	}
 }
