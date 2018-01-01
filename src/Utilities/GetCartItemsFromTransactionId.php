@@ -11,8 +11,6 @@ use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 class GetCartItemsFromTransactionId {
 
 	/**
-	 * You receive an array of Cart Items, but actually it should only be 1 item if all you have
-	 * are subscriptions.
 	 * @param string $sGatewayTxnId
 	 * @return CartItemVo[]
 	 * @throws \Exception
