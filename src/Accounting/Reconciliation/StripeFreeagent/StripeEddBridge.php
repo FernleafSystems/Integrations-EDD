@@ -2,6 +2,7 @@
 
 namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreeagent;
 
+use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
 use FernleafSystems\Integrations\Edd\Utilities\GetSubscriptionsFromGatewayTxnId;
 use FernleafSystems\Integrations\Freeagent\DataWrapper;
@@ -34,7 +35,7 @@ class StripeEddBridge extends StripeBridge {
 				->setItemQuantity( $oItem->getQuantity() )
 				->setItemSubtotal( $oItem->getSubtotal() )
 				->setItemTaxRate( $oItem->getTaxRate() )
-				->setIsEuVatMoss( $this->isPaymentEuVatMossRegion() )
+				->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
 				->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
 
 		return $oCharge;

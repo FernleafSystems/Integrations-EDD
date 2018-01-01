@@ -4,12 +4,12 @@ namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
-use FernleafSystems\ApiWrappers\Freeagent\Entities\Invoices\InvoiceVO;
 use FernleafSystems\Integrations\Edd\Consumers\EddPaymentConsumer;
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 use FernleafSystems\Integrations\Edd\Utilities;
 use FernleafSystems\Integrations\Freeagent\Consumers\FreeagentConfigVoConsumer;
 use FernleafSystems\Integrations\Freeagent\DataWrapper\ChargeVO;
+use FernleafSystems\Integrations\Freeagent\Reconciliation\Invoices\CreateFromCharge;
 
 /**
  * Implements the FernleafSystems\Integrations\Freeagent\Reconciliation\Bridge\BridgeInterface
@@ -78,44 +78,30 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * TODO : Be able to replace cartiem with ChargeVO so we can abstract this.
 	 * First attempts to locate a previously created invoice for this Payment.
 	 * @param CartItemVo $oCartItem
-	 * @return Entities\Invoices\InvoiceVO
+	 * @return Entities\Invoices\InvoiceVO|null
+	 * @throws \Exception
 	 */
 	public function createFreeagentInvoiceFromEddPaymentCartItem( $oCartItem ) {
-		$oInvoice = null;
 
-		$oEddPayment = new \EDD_Payment( $oCartItem->getParentPaymentId() );
-
-		// 1st: Create/update the FreeAgent Contact.
-		$nContactId = $this->getFreeagentContactIdFromEddPayment( $oEddPayment );
-		$oContact = $this->createFreeagentContactFromPayment( $oEddPayment, !empty( $nContactId ) );
-
-		// 2nd: Retrieve/Create FreeAgent Invoice
 		$sTxnId = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $oCartItem );
-		$aInvoiceIds = $this->getFreeagentInvoiceIdsFromEddPayment( $oEddPayment );
+		$oCharge = $this->buildChargeFromTransaction( $sTxnId );
 
-		$nInvoiceId = isset( $aInvoiceIds[ $sTxnId ] ) ? $aInvoiceIds[ $sTxnId ] : null;
-		if ( !empty( $nInvoiceId ) ) {
+		$nInvoiceId = $this->getFreeagentInvoiceId( $oCharge );
+		if ( empty( $nInvoiceId ) ) {
+			$oInvoice = ( new CreateFromCharge() )
+				->setBridge( $this )
+				->setConnection( $this->getConnection() )
+				->setFreeagentConfigVO( $this->getFreeagentConfigVO() )
+				->setChargeVO( $oCharge )
+				->create();
+		}
+		else {
 			$oInvoice = ( new Entities\Invoices\Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $nInvoiceId )
 				->retrieve();
-		}
-
-		if ( empty( $oInvoice ) ) {
-			$oInvoice = ( new EddCartItemToFreeagentInvoice() )
-				->setFreeagentConfigVO( $this->getFreeagentConfigVO() )
-				->setConnection( $this->getConnection() )
-				->setContactVo( $oContact )
-				->setPayment( $oEddPayment )
-				->createInvoice( $oCartItem );
-
-			if ( !is_null( $oInvoice ) ) {
-				$aInvoiceIds[ $sTxnId ] = $oInvoice->getId();
-				$oEddPayment->update_meta( self::KEY_FREEAGENT_INVOICE_IDS, $aInvoiceIds );
-			}
 		}
 		return $oInvoice;
 	}
@@ -184,6 +170,18 @@ trait CommonEddBridge {
 	}
 
 	/**
+	 * @param Entities\Invoices\InvoiceVO $oInvoice
+	 * @param ChargeVO                    $oCharge
+	 * @return $this
+	 */
+	public function storeFreeagentInvoiceIdForCharge( $oInvoice, $oCharge ) {
+		$aInvoiceIds[ $oCharge->getId() ] = $oInvoice->getId();
+		$this->getEddPaymentFromCharge( $oCharge )
+			 ->update_meta( self::KEY_FREEAGENT_INVOICE_IDS, $aInvoiceIds );
+		return $this;
+	}
+
+	/**
 	 * @param ChargeVO $oCharge
 	 * @return bool
 	 */
@@ -192,10 +190,11 @@ trait CommonEddBridge {
 	}
 
 	/**
+	 * @param ChargeVO $oCharge
 	 * @return bool
 	 */
-	protected function isPaymentEuVatMossRegion() {
-		$sPaymentCountry = $this->getEddPaymentFromCharge()->address[ 'country' ];
+	protected function isPaymentEuVatMossRegion( $oCharge ) {
+		$sPaymentCountry = $this->getEddPaymentFromCharge( $oCharge )->address[ 'country' ];
 		return ( $sPaymentCountry != 'GB' &&
 				 array_key_exists( $sPaymentCountry, $this->getTaxCountriesRates() ) );
 	}
