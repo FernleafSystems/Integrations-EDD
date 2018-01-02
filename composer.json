@@ -26,7 +26,7 @@
     "php":                                           ">=5.4.0",
     "fernleafsystems/utilities":                     "^1.0",
     "fernleafsystems/integrations-stripe-freeagent": "^0.6.1",
-    "fernleafsystems/integrations-paypal-freeagent": "dev-develop"
+    "fernleafsystems/integrations-paypal-freeagent": "^0.0.1"
   },
   "require-dev":       {
   },
