@@ -1,29 +1,31 @@
 {
-  "name":         "fernleafsystems/integrations-edd",
-  "description":  "Provides useful helper classes for Easy Digital Downloads",
-  "authors":      [
-	{
-	  "name":     "Paul Goodchild",
-	  "email":    "paul@paulgoodchild.me",
-	  "homepage": "https://paulgoodchild.me"
-	}
+  "name":              "fernleafsystems/integrations-edd",
+  "description":       "Provides useful helper classes for Easy Digital Downloads",
+  "authors":           [
+    {
+      "name":     "Paul Goodchild",
+      "email":    "paul@paulgoodchild.me",
+      "homepage": "https://paulgoodchild.me"
+    }
   ],
-  "license":      "MIT",
-  "keywords":     [
-	"Easy Digital Downloads"
+  "license":           "MIT",
+  "keywords":          [
+    "Easy Digital Downloads"
   ],
-  "repositories": [
+  "repositories":      [
   ],
-  "require":      {
-	"php":                                           ">=5.4.0",
-	"fernleafsystems/utilities":                     "^1.0",
-	"fernleafsystems/integrations-stripe-freeagent": "~0.5.0"
+  "require":           {
+    "php":                                           ">=5.4.0",
+    "fernleafsystems/utilities":                     "^1.0",
+    "fernleafsystems/integrations-stripe-freeagent": "^0.6.1"
   },
-  "require-dev":  {
+  "require-dev":       {
   },
-  "autoload":     {
-	"psr-4": {
-	  "FernleafSystems\\Integrations\\Edd\\": "src"
-	}
+  "minimum-stability": "dev",
+  "prefer-stable":     true,
+  "autoload":          {
+    "psr-4": {
+      "FernleafSystems\\Integrations\\Edd\\": "src"
+    }
   }
 }

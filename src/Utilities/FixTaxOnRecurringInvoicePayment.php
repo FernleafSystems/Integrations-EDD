@@ -2,8 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
-
 /**
  * Class FixTaxOnRecurringInvoice
  * @package FernleafSystems\Integrations\Edd\Utilities
@@ -11,11 +9,7 @@ use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 class FixTaxOnRecurringInvoicePayment {
 
 	/**
-	 * You receive an array of Cart Items, but actually it should only be 1 item if all you have
-	 * are subscriptions.
 	 * @param \EDD_Payment $oPayment
-	 * @return CartItemVo[]
-	 * @throws \Exception
 	 */
 	public function fix( $oPayment ) {
 		if ( $oPayment->tax == 0 && $oPayment->status == 'edd_subscription'

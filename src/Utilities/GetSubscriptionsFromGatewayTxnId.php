@@ -3,10 +3,10 @@
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
 /**
- * Class GetSubscriptionsFromTransactionId
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
+ * Class GetSubscriptionsFromGatewayTxnId
+ * @package FernleafSystems\Integrations\Edd\Utilities
  */
-class GetSubscriptionsFromTransactionId {
+class GetSubscriptionsFromGatewayTxnId {
 
 	/**
 	 * @param string $sTransactionId

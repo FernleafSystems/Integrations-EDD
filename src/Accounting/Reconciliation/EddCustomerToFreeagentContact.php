@@ -1,11 +1,12 @@
 <?php
 
-namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreeagent;
+namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
 
 /**
+ * TODO: Abstract this whole thing into the Freeagent Integration Bridge
  * Class EddCustomerToFreeagentContact
  * @package FernleafSystems\Wordpress\Plugin\Edd\Freeagent\Adaptation
  */
