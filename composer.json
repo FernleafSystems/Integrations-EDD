@@ -17,10 +17,6 @@
     "Utilities"
   ],
   "repositories":      [
-    {
-      "type": "vcs",
-      "url":  "https://github.com/FernleafSystems/Integrations-PayPal-FreeAgent"
-    }
   ],
   "require":           {
     "php":                                           ">=5.4.0",
