@@ -10,14 +10,23 @@
   ],
   "license":           "MIT",
   "keywords":          [
-    "Easy Digital Downloads"
+    "Easy Digital Downloads",
+    "FreeAgent",
+    "Stripe",
+    "PayPal",
+    "Utilities"
   ],
   "repositories":      [
+    {
+      "type": "vcs",
+      "url":  "https://github.com/FernleafSystems/Integrations-PayPal-FreeAgent"
+    }
   ],
   "require":           {
     "php":                                           ">=5.4.0",
     "fernleafsystems/utilities":                     "^1.0",
-    "fernleafsystems/integrations-stripe-freeagent": "^0.6.1"
+    "fernleafsystems/integrations-stripe-freeagent": "^0.6.1",
+    "fernleafsystems/integrations-paypal-freeagent": "dev-develop"
   },
   "require-dev":       {
   },
