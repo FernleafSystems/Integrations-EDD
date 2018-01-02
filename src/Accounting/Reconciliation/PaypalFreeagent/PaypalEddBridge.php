@@ -3,9 +3,9 @@
 namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\PaypalFreeagent;
 
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
-use FernleafSystems\Integrations\Freeagent\Reconciliation\Bridge\BridgeInterface;
+use FernleafSystems\Integrations\Paypal_Freeagent\Reconciliation\Bridge\PaypalBridge;
 
-class PaypalEddBridge implements BridgeInterface {
+class PaypalEddBridge implements PaypalBridge {
 
 	use CommonEddBridge;
 }
