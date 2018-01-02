@@ -17,7 +17,7 @@
   "require":           {
     "php":                                           ">=5.4.0",
     "fernleafsystems/utilities":                     "^1.0",
-    "fernleafsystems/integrations-stripe-freeagent": "dev-feature/abstract"
+    "fernleafsystems/integrations-stripe-freeagent": "^0.6.1"
   },
   "require-dev":       {
   },
