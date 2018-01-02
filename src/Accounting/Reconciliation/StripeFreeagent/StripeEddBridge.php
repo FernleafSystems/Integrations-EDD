@@ -30,15 +30,13 @@ class StripeEddBridge extends StripeBridge {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		$oCharge->setItemName( $oItem->getName() )
-				->setItemPeriodType( $sPeriod )
-				->setItemQuantity( $oItem->getQuantity() )
-				->setItemSubtotal( $oItem->getSubtotal() )
-				->setItemTaxRate( $oItem->getTaxRate() )
-				->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
-				->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
-
-		return $oCharge;
+		return $oCharge->setItemName( $oItem->getName() )
+					   ->setItemPeriodType( $sPeriod )
+					   ->setItemQuantity( $oItem->getQuantity() )
+					   ->setItemSubtotal( $oItem->getSubtotal() )
+					   ->setItemTaxRate( $oItem->getTaxRate() )
+					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
+					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
 	}
 
 	/**
