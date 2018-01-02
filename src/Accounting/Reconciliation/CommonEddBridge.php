@@ -170,11 +170,11 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param Entities\Invoices\InvoiceVO $oInvoice
 	 * @param ChargeVO                    $oCharge
+	 * @param Entities\Invoices\InvoiceVO $oInvoice
 	 * @return $this
 	 */
-	public function storeFreeagentInvoiceIdForCharge( $oInvoice, $oCharge ) {
+	public function storeFreeagentInvoiceIdForCharge( $oCharge, $oInvoice ) {
 		$aInvoiceIds[ $oCharge->getId() ] = $oInvoice->getId();
 		$this->getEddPaymentFromCharge( $oCharge )
 			 ->update_meta( self::KEY_FREEAGENT_INVOICE_IDS, $aInvoiceIds );
