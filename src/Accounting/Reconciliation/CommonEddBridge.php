@@ -127,8 +127,8 @@ trait CommonEddBridge {
 	 * @throws \Exception
 	 */
 	protected function getCartItemDetailsFromGatewayTxn( $sGatewayTxnId ) {
-		$aCartItems = ( new Utilities\GetCartItemsFromTransactionId() )
-			->retrieve( $sGatewayTxnId );
+		$aCartItems = ( new Utilities\GetCartItemsFrom() )
+			->transactionId( $sGatewayTxnId );
 		if ( count( $aCartItems ) != 1 ) { // TODO - if we offer non-subscription items!
 			error_log( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $sGatewayTxnId ) );
 		}
