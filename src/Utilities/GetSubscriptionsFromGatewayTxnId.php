@@ -9,16 +9,22 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 class GetSubscriptionsFromGatewayTxnId {
 
 	/**
-	 * @param string $sTransactionId
+	 * TODO: This is still problematic if you have multiple subscriptions in a single purchase
+	 * @param string $sTxnId
 	 * @return \EDD_Subscription
 	 */
-	public function retrieve( $sTransactionId ) {
+	public function retrieve( $sTxnId ) {
 		$aSubs = ( new \EDD_Subscriptions_DB() )
 			->get_subscriptions(
 				array(
-					'transaction_id' => $sTransactionId
+					'transaction_id' => $sTxnId
 				)
 			);
-		return ( count( $aSubs ) == 1 ) ? $aSubs[ 0 ] : null;
+
+		if ( empty( $aSubs ) ) {
+			$aSubs = ( new GetSubscriptionsFromPaymentId() )
+				->retrieve( edd_get_purchase_id_by_transaction_id( $sTxnId ) );
+		}
+		return ( count( $aSubs ) == 1 ) ? array_shift( $aSubs ) : null;
 	}
 }
