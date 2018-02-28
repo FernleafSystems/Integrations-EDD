@@ -14,18 +14,32 @@ class Retrieve {
 	 */
 	public function allForCustomer( $nCustomerId ) {
 
-		$aParams = array(
-			'post_type'   => 'edd_license',
-			'post_parent' => 0,
-			'fields'      => 'ids',
-			'nopaging'    => true,
-			'meta_query'  => array(
-				array(
-					'key'     => '_edd_sl_user_id',
-					'value'   => $nCustomerId,
-					'compare' => '='
-				)
+		$aMeta = array(
+			array(
+				'key'     => '_edd_sl_user_id',
+				'value'   => $nCustomerId,
+				'compare' => '='
 			)
+		);
+		return $this->retrieve( array(), $aMeta );
+	}
+
+	/**
+	 * @param array $aQueryParams
+	 * @param array $aMetaQuery
+	 * @return \EDD_SL_License[]
+	 */
+	public function retrieve( $aQueryParams = array(), $aMetaQuery = array() ) {
+
+		$aParams = array_merge(
+			array(
+				'post_type'   => 'edd_license',
+				'post_parent' => 0,
+				'fields'      => 'ids',
+				'nopaging'    => true,
+				'meta_query'  => $aMetaQuery,
+			),
+			$aQueryParams
 		);
 
 		return array_map(
