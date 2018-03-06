@@ -3,6 +3,7 @@
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
 use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
+use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
 
 /**
  * Class Retrieve
@@ -10,21 +11,8 @@ use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
  */
 class Retrieve {
 
-	use EddCustomerConsumer;
-
-	/**
-	 * @param int $nDownloadId
-	 * @return \EDD_SL_License[]
-	 */
-	public function allForDownload( $nDownloadId ) {
-		return array_values( array_filter(
-			$this->retrieve(),
-			function ( $oLicense ) use ( $nDownloadId ) {
-				/** @var \EDD_SL_License $oLicense */
-				return ( $oLicense->download_id === $nDownloadId );
-			}
-		) );
-	}
+	use EddCustomerConsumer,
+		EddDownloadConsumer;
 
 	/**
 	 * @param array $aQueryParams
@@ -32,6 +20,41 @@ class Retrieve {
 	 * @return \EDD_SL_License[]
 	 */
 	public function retrieve( $aQueryParams = array(), $aMetaQuery = array() ) {
+		$aLicenses = array_map(
+			function ( $nLicenseId ) {
+				return new \EDD_SL_License( $nLicenseId );
+			},
+			$this->runQuery( $aQueryParams, $aMetaQuery )
+		);
+
+		if ( !empty( $this->getEddDownload() ) ) {
+			$aLicenses = $this->filterForDownload( $aLicenses );
+		}
+
+		return $aLicenses;
+	}
+
+	/**
+	 * @param \EDD_SL_License[] $aLicenses
+	 * @return \EDD_SL_License[]
+	 */
+	protected function filterForDownload( $aLicenses ) {
+		$oDownload = $this->getEddDownload();
+		return array_values( array_filter(
+			$aLicenses,
+			function ( $oLicense ) use ( $oDownload ) {
+				/** @var \EDD_SL_License $oLicense */
+				return ( $oLicense->download_id === $oDownload->ID );
+			}
+		) );
+	}
+
+	/**
+	 * @param array $aQueryParams
+	 * @param array $aMetaQuery
+	 * @return int[] - license record IDs
+	 */
+	public function runQuery( $aQueryParams = array(), $aMetaQuery = array() ) {
 
 		$oCustomer = $this->getEddCustomer();
 		if ( !empty( $oCustomer ) ) {
@@ -52,12 +75,6 @@ class Retrieve {
 			),
 			$aQueryParams
 		);
-
-		return array_map(
-			function ( $nLicenseId ) {
-				return new \EDD_SL_License( $nLicenseId );
-			},
-			( new \WP_Query() )->query( $aParams )
-		);
+		return ( new \WP_Query() )->query( $aParams );
 	}
 }

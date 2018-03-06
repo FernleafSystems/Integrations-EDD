@@ -16,7 +16,7 @@ trait EddDownloadConsumer {
 	/**
 	 * @return \EDD_Download
 	 */
-	public function getEddCustomer() {
+	public function getEddDownload() {
 		return $this->oEddDownload;
 	}
 
@@ -24,7 +24,7 @@ trait EddDownloadConsumer {
 	 * @param \EDD_Download $oEddDownload
 	 * @return $this
 	 */
-	public function setEddCustomer( $oEddDownload ) {
+	public function setEddDownload( $oEddDownload ) {
 		$this->oEddDownload = $oEddDownload;
 		return $this;
 	}
