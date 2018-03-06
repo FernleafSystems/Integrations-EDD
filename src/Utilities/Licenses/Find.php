@@ -33,4 +33,23 @@ class Find {
 		}
 		return $oTheLicense;
 	}
+
+	/**
+	 * @param string $sSiteUrl
+	 * @return \EDD_SL_License
+	 */
+	public function withActiveSite( $sSiteUrl ) {
+		$oRetriever = ( new Retrieve() )
+			->setEddCustomer( $this->getEddCustomer() )
+			->setEddDownload( $this->getEddDownload() );
+
+		$oTheLicense = null;
+		foreach ( $oRetriever->retrieve() as $oLicense ) {
+			if ( in_array( $sSiteUrl, $oLicense->sites ) ) {
+				$oTheLicense = $oLicense;
+				break;
+			}
+		}
+		return $oTheLicense;
+	}
 }
