@@ -32,11 +32,9 @@ class Counts {
 		$nTotalActivationsNonExpired = 0;
 		$nTotalActivationsExpired = 0;
 		$nTotalActivationLimitExpired = 0;
-		$aAssignedSites = array();
 
 		foreach ( $oRetriever->retrieve() as $oLicense ) {
 
-			$oLicense->is_expired(); // ensure the latest status is set
 			$nActivationLimit = $oLicense->license_limit();
 
 			if ( in_array( $oLicense->status, array( 'active', 'inactive' ) ) ) {
@@ -45,7 +43,6 @@ class Counts {
 				if ( is_numeric( $nActivationLimit ) ) {
 					$nTotalActivationLimit += $nActivationLimit;
 				}
-				$aAssignedSites = array_merge( $aAssignedSites, $oLicense->sites );
 			}
 			else {
 				$nTotalActivationsExpired += $oLicense->activation_count;
@@ -68,7 +65,7 @@ class Counts {
 	 * @return int
 	 */
 	public function getAssigned() {
-		return $this->getLastResults()[ 'available' ];
+		return $this->getLastResults()[ 'assigned' ];
 	}
 
 	/**
