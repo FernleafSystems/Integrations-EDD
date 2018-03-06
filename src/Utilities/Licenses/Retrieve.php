@@ -2,26 +2,28 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
+use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
+
 /**
- * Class RetrieveAll
+ * Class Retrieve
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
  */
 class Retrieve {
 
+	use EddCustomerConsumer;
+
 	/**
-	 * @param int $nCustomerId
+	 * @param int $nDownloadId
 	 * @return \EDD_SL_License[]
 	 */
-	public function allForCustomer( $nCustomerId ) {
-
-		$aMeta = array(
-			array(
-				'key'     => '_edd_sl_user_id',
-				'value'   => $nCustomerId,
-				'compare' => '='
-			)
-		);
-		return $this->retrieve( array(), $aMeta );
+	public function allForDownload( $nDownloadId ) {
+		return array_values( array_filter(
+			$this->retrieve(),
+			function ( $oLicense ) use ( $nDownloadId ) {
+				/** @var \EDD_SL_License $oLicense */
+				return ( $oLicense->download_id === $nDownloadId );
+			}
+		) );
 	}
 
 	/**
@@ -30,6 +32,15 @@ class Retrieve {
 	 * @return \EDD_SL_License[]
 	 */
 	public function retrieve( $aQueryParams = array(), $aMetaQuery = array() ) {
+
+		$oCustomer = $this->getEddCustomer();
+		if ( !empty( $oCustomer ) ) {
+			$aMetaQuery[] = array(
+				'key'     => '_edd_sl_user_id',
+				'value'   => $oCustomer->id,
+				'compare' => '='
+			);
+		}
 
 		$aParams = array_merge(
 			array(
