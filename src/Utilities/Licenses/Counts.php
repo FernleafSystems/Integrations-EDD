@@ -41,13 +41,13 @@ class Counts {
 				$nTotalActivationLimitExpired += $oLicense->license_limit();
 			}
 			else {
+				$nTotalActivationsNonExpired += $oLicense->activation_count;
 				if ( $oLicense->activation_limit <= 0 ) {
 					$bUnlimited = true;
-					break;
 				}
-
-				$nTotalActivationsNonExpired += $oLicense->activation_count;
-				$nTotalActivationLimit += $oLicense->license_limit();
+				else {
+					$nTotalActivationLimit += $oLicense->license_limit();
+				}
 			}
 		}
 
