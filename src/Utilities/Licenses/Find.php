@@ -35,21 +35,53 @@ class Find {
 	}
 
 	/**
-	 * @param string $sSiteUrl
+	 * @param string $sUrl
+	 * @param bool   $bIncludeExpired
 	 * @return \EDD_SL_License
 	 */
-	public function withActiveSite( $sSiteUrl ) {
-		$oRetriever = ( new Retrieve() )
-			->setEddCustomer( $this->getEddCustomer() )
-			->setEddDownload( $this->getEddDownload() );
-
+	public function withActiveSite( $sUrl, $bIncludeExpired = false ) {
 		$oTheLicense = null;
-		foreach ( $oRetriever->retrieve() as $oLicense ) {
-			if ( in_array( $sSiteUrl, $oLicense->sites ) ) {
-				$oTheLicense = $oLicense;
-				break;
+
+		$aLicensesByMeta = $this->withActiveSiteUsingMetaQuery( $sUrl );
+		if ( !empty( $aLicensesByMeta ) ) {
+			foreach ( $aLicensesByMeta as $oLic ) {
+				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
+					$oTheLicense = $oLic;
+					break;
+				}
 			}
 		}
+
+		if ( empty( $oTheLicense ) ) {
+			$oRetriever = ( new Retrieve() )
+				->setEddCustomer( $this->getEddCustomer() )
+				->setEddDownload( $this->getEddDownload() );
+
+			foreach ( $oRetriever->retrieve() as $oLic ) {
+				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
+					$oTheLicense = $oLic;
+					break;
+				}
+			}
+		}
+
 		return $oTheLicense;
+	}
+
+	/**
+	 * Assumes the site url passed here is clean and ready to go
+	 * @param string $sUrl
+	 * @return \EDD_SL_License[]
+	 */
+	public function withActiveSiteUsingMetaQuery( $sUrl ) {
+		$aMeta = array(
+			'key'     => '_edd_sl_sites',
+			'value'   => '%:"'.$sUrl.'";%',
+			'compare' => 'LIKE'
+		);
+		return ( new Retrieve() )
+			->setEddCustomer( $this->getEddCustomer() )
+			->setEddDownload( $this->getEddDownload() )
+			->retrieve( array(), $aMeta );
 	}
 }

@@ -32,26 +32,28 @@ class Counts {
 		$nTotalActivationsNonExpired = 0;
 		$nTotalActivationsExpired = 0;
 		$nTotalActivationLimitExpired = 0;
+		$bUnlimited = false;
 
 		foreach ( $oRetriever->retrieve() as $oLicense ) {
 
-			$nActivationLimit = $oLicense->license_limit();
-
-			if ( in_array( $oLicense->status, array( 'active', 'inactive' ) ) ) {
-				$nTotalActivationsNonExpired += $oLicense->activation_count;
-
-				if ( is_numeric( $nActivationLimit ) ) {
-					$nTotalActivationLimit += $nActivationLimit;
-				}
+			if ( $oLicense->is_expired() ) {
+				$nTotalActivationsExpired += $oLicense->activation_count;
+				$nTotalActivationLimitExpired += $oLicense->license_limit();
 			}
 			else {
-				$nTotalActivationsExpired += $oLicense->activation_count;
-				$nTotalActivationLimitExpired += $nActivationLimit;
+				if ( $oLicense->activation_limit <= 0  ) {
+					$bUnlimited = true;
+					break;
+				}
+
+				$nTotalActivationsNonExpired += $oLicense->activation_count;
+				$nTotalActivationLimit += $oLicense->license_limit();
 			}
 		}
 		$nTotalActivationsUnused = $nTotalActivationLimit - $nTotalActivationsNonExpired;
 
 		$this->aLastResults = array(
+			'unlimited'         => $bUnlimited,
 			'available'         => $nTotalActivationLimit,
 			'assigned'          => $nTotalActivationsNonExpired,
 			'unassigned'        => $nTotalActivationsUnused,
@@ -94,6 +96,13 @@ class Counts {
 	 */
 	public function getUnassigned() {
 		return $this->getLastResults()[ 'unassigned' ];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isUnlimited() {
+		return $this->getLastResults()[ 'unlimited' ];
 	}
 
 	/**
