@@ -41,7 +41,7 @@ class Counts {
 				$nTotalActivationLimitExpired += $oLicense->license_limit();
 			}
 			else {
-				if ( $oLicense->activation_limit <= 0  ) {
+				if ( $oLicense->activation_limit <= 0 ) {
 					$bUnlimited = true;
 					break;
 				}
@@ -50,15 +50,13 @@ class Counts {
 				$nTotalActivationLimit += $oLicense->license_limit();
 			}
 		}
-		$nTotalActivationsUnused = $nTotalActivationLimit - $nTotalActivationsNonExpired;
 
 		$this->aLastResults = array(
-			'unlimited'         => $bUnlimited,
-			'available'         => $nTotalActivationLimit,
-			'assigned'          => $nTotalActivationsNonExpired,
-			'unassigned'        => $nTotalActivationsUnused,
-			'available_expired' => $nTotalActivationLimitExpired,
-			'assigned_expired'  => $nTotalActivationsExpired,
+			'unlimited'        => $bUnlimited,
+			'limit'            => $nTotalActivationLimit,
+			'assigned'         => $nTotalActivationsNonExpired,
+			'limit_expired'    => $nTotalActivationLimitExpired,
+			'assigned_expired' => $nTotalActivationsExpired,
 		);
 		return $this;
 	}
@@ -73,8 +71,8 @@ class Counts {
 	/**
 	 * @return int
 	 */
-	public function getAvailable() {
-		return $this->getLastResults()[ 'available' ];
+	public function getActivationLimit() {
+		return $this->getLastResults()[ 'limit' ];
 	}
 
 	/**
@@ -87,22 +85,22 @@ class Counts {
 	/**
 	 * @return int
 	 */
-	public function getExpiredAvailable() {
-		return $this->getLastResults()[ 'available_expired' ];
+	public function getExpiredLimit() {
+		return $this->getLastResults()[ 'limit_expired' ];
 	}
 
 	/**
-	 * @return int
+	 * @return int - PHP_INT_MAX if unlimited
 	 */
 	public function getUnassigned() {
-		return $this->getLastResults()[ 'unassigned' ];
+		return $this->isUnlimited() ? PHP_INT_MAX : ( $this->getActivationLimit() - $this->getAssigned() );
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function hasAvailable() {
-		return $this->isUnlimited() || $this->getAvailable() > 0;
+		return $this->isUnlimited() || $this->getUnassigned() > 0;
 	}
 
 	/**
