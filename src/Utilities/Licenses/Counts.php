@@ -101,6 +101,13 @@ class Counts {
 	/**
 	 * @return bool
 	 */
+	public function hasAvailable() {
+		return $this->isUnlimited() || $this->getAvailable() > 0;
+	}
+
+	/**
+	 * @return bool
+	 */
 	public function isUnlimited() {
 		return $this->getLastResults()[ 'unlimited' ];
 	}
