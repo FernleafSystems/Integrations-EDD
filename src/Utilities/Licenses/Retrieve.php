@@ -42,7 +42,7 @@ class Retrieve {
 		if ( !empty( $this->getEddCustomer() ) ) {
 			$aMetaQuery[] = array(
 				'key'     => '_edd_sl_user_id',
-				'value'   => $this->getEddCustomer()->id,
+				'value'   => $this->getEddCustomer()->user_id,
 				'compare' => '='
 			);
 		}
