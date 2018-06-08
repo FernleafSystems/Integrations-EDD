@@ -32,31 +32,31 @@ class Counts {
 		$nTotalActivationsNonExpired = 0;
 		$nTotalActivationsExpired = 0;
 		$nTotalActivationLimitExpired = 0;
+		$bUnlimited = false;
 
 		foreach ( $oRetriever->retrieve() as $oLicense ) {
 
-			$nActivationLimit = $oLicense->license_limit();
-
-			if ( in_array( $oLicense->status, array( 'active', 'inactive' ) ) ) {
-				$nTotalActivationsNonExpired += $oLicense->activation_count;
-
-				if ( is_numeric( $nActivationLimit ) ) {
-					$nTotalActivationLimit += $nActivationLimit;
-				}
+			if ( $oLicense->is_expired() ) {
+				$nTotalActivationsExpired += $oLicense->activation_count;
+				$nTotalActivationLimitExpired += $oLicense->license_limit();
 			}
 			else {
-				$nTotalActivationsExpired += $oLicense->activation_count;
-				$nTotalActivationLimitExpired += $nActivationLimit;
+				$nTotalActivationsNonExpired += $oLicense->activation_count;
+				if ( $oLicense->activation_limit <= 0 ) {
+					$bUnlimited = true;
+				}
+				else {
+					$nTotalActivationLimit += $oLicense->license_limit();
+				}
 			}
 		}
-		$nTotalActivationsUnused = $nTotalActivationLimit - $nTotalActivationsNonExpired;
 
 		$this->aLastResults = array(
-			'available'         => $nTotalActivationLimit,
-			'assigned'          => $nTotalActivationsNonExpired,
-			'unassigned'        => $nTotalActivationsUnused,
-			'available_expired' => $nTotalActivationLimitExpired,
-			'assigned_expired'  => $nTotalActivationsExpired,
+			'unlimited'        => $bUnlimited,
+			'limit'            => $nTotalActivationLimit,
+			'assigned'         => $nTotalActivationsNonExpired,
+			'limit_expired'    => $nTotalActivationLimitExpired,
+			'assigned_expired' => $nTotalActivationsExpired,
 		);
 		return $this;
 	}
@@ -71,8 +71,8 @@ class Counts {
 	/**
 	 * @return int
 	 */
-	public function getAvailable() {
-		return $this->getLastResults()[ 'available' ];
+	public function getActivationLimit() {
+		return $this->getLastResults()[ 'limit' ];
 	}
 
 	/**
@@ -85,15 +85,29 @@ class Counts {
 	/**
 	 * @return int
 	 */
-	public function getExpiredAvailable() {
-		return $this->getLastResults()[ 'available_expired' ];
+	public function getExpiredLimit() {
+		return $this->getLastResults()[ 'limit_expired' ];
 	}
 
 	/**
-	 * @return int
+	 * @return int - PHP_INT_MAX if unlimited
 	 */
 	public function getUnassigned() {
-		return $this->getLastResults()[ 'unassigned' ];
+		return $this->isUnlimited() ? PHP_INT_MAX : ( $this->getActivationLimit() - $this->getAssigned() );
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasAvailable() {
+		return $this->isUnlimited() || $this->getUnassigned() > 0;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isUnlimited() {
+		return $this->getLastResults()[ 'unlimited' ];
 	}
 
 	/**
