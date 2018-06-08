@@ -103,6 +103,19 @@ trait CommonEddBridge {
 				->setEntityId( $nInvoiceId )
 				->retrieve();
 		}
+
+		if ( $oInvoice->isStatusDraft() ) {
+			sleep( 10 );
+			( new Entities\Invoices\MarkAs() )
+				->setConnection( $this->getConnection() )
+				->setEntityId( $oInvoice->getId() )
+				->sent();
+			$oInvoice = ( new Entities\Invoices\Retrieve() )
+				->setConnection( $this->getConnection() )
+				->setEntityId( $oInvoice->getId() )
+				->retrieve();
+		}
+
 		return $oInvoice;
 	}
 
