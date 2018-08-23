@@ -84,12 +84,20 @@ trait CommonEddBridge {
 	 * @throws \Exception
 	 */
 	public function createFreeagentInvoiceFromEddPaymentCartItem( $oCartItem ) {
+		$oInvoice = null;
 
 		$sTxnId = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $oCartItem );
 		$oCharge = $this->buildChargeFromTransaction( $sTxnId );
 
 		$nInvoiceId = $this->getFreeagentInvoiceId( $oCharge );
-		if ( empty( $nInvoiceId ) ) {
+
+		if ( !empty( $nInvoiceId ) ) {
+			$oInvoice = ( new Entities\Invoices\Retrieve() )
+				->setConnection( $this->getConnection() )
+				->setEntityId( $nInvoiceId )
+				->retrieve();
+		}
+		if ( empty( $nInvoiceId ) || empty( $oInvoice ) ) {
 			$oInvoice = ( new CreateFromCharge() )
 				->setBridge( $this )
 				->setConnection( $this->getConnection() )
@@ -97,14 +105,8 @@ trait CommonEddBridge {
 				->setChargeVO( $oCharge )
 				->create();
 		}
-		else {
-			$oInvoice = ( new Entities\Invoices\Retrieve() )
-				->setConnection( $this->getConnection() )
-				->setEntityId( $nInvoiceId )
-				->retrieve();
-		}
 
-		if ( $oInvoice->isStatusDraft() ) {
+		if ( !empty( $oInvoice ) && $oInvoice->isStatusDraft() ) {
 			sleep( 10 );
 			( new Entities\Invoices\MarkAs() )
 				->setConnection( $this->getConnection() )
