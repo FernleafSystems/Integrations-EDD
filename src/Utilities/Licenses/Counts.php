@@ -40,7 +40,7 @@ class Counts {
 				$nTotalActivationsExpired += $oLicense->activation_count;
 				$nTotalActivationLimitExpired += $oLicense->license_limit();
 			}
-			else {
+			else if ( $oLicense->get_post_status() == 'publish' ) { // 'draft' -> disabled, e.g. due to refund
 				$nTotalActivationsNonExpired += $oLicense->activation_count;
 				if ( $oLicense->activation_limit <= 0 ) {
 					$bUnlimited = true;

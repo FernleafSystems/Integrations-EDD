@@ -24,7 +24,7 @@ class Find {
 
 		$oTheLicense = null;
 		foreach ( $oRetriever->retrieve() as $oLicense ) {
-			if ( !$oLicense->is_expired() ) {
+			if ( !$oLicense->is_expired() && $oLicense->get_post_status() == 'publish' ) {
 				$nLimit = $oLicense->activation_limit; // 0 == unlimited
 				if ( $nLimit <= 0 || $nLimit > $oLicense->activation_count ) {
 					$oTheLicense = $oLicense;
