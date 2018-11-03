@@ -15,6 +15,31 @@ class Retrieve {
 		EddDownloadConsumer;
 
 	/**
+	 * @var array
+	 */
+	private $aLastResults;
+
+	/**
+	 * @var bool
+	 */
+	private $bIncludeDisabledLicenses = false;
+
+	/**
+	 * @return array
+	 */
+	public function getLastResults() {
+		return is_array( $this->aLastResults ) ? $this->aLastResults : array();
+	}
+
+	/**
+	 * @return $this
+	 */
+	public function reset() {
+		$this->aLastResults = array();
+		return $this;
+	}
+
+	/**
 	 * @param array $aQueryParams
 	 * @param array $aMetaQuery
 	 * @return \EDD_SL_License[]
@@ -55,9 +80,14 @@ class Retrieve {
 			);
 		}
 
+		if ( $this->isIncludeDisabledLicenses() ) {
+			$aQueryParams[ 'post_status' ] = '';
+		}
+
 		$aParams = array_merge(
 			array(
 				'post_type'   => 'edd_license',
+				'post_status' => 'publish', // Not disabled, due to for example refunds
 				'post_parent' => 0,
 				'fields'      => 'ids',
 				'nopaging'    => true,
@@ -66,5 +96,30 @@ class Retrieve {
 			$aQueryParams
 		);
 		return ( new \WP_Query() )->query( $aParams );
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isIncludeDisabledLicenses() {
+		return $this->bIncludeDisabledLicenses;
+	}
+
+	/**
+	 * @param bool $bIncludeDisabledLicenses
+	 * @return $this
+	 */
+	public function setIncludeDisabledLicenses( $bIncludeDisabledLicenses ) {
+		$this->bIncludeDisabledLicenses = $bIncludeDisabledLicenses;
+		return $this;
+	}
+
+	/**
+	 * @param array $aRes
+	 * @return $this
+	 */
+	public function setLastResults( $aRes ) {
+		$this->aLastResults = $aRes;
+		return $this;
 	}
 }
