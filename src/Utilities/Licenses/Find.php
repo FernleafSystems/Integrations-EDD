@@ -2,28 +2,18 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
-use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
-use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
-
 /**
  * Class Find
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
  */
-class Find {
-
-	use EddCustomerConsumer,
-		EddDownloadConsumer;
+class Find extends Retrieve {
 
 	/**
 	 * @return \EDD_SL_License|null
 	 */
 	public function withActivationSlot() {
-		$oRetriever = ( new Retrieve() )
-			->setEddCustomer( $this->getEddCustomer() )
-			->setEddDownload( $this->getEddDownload() );
-
 		$oTheLicense = null;
-		foreach ( $oRetriever->retrieve() as $oLicense ) {
+		foreach ( $this->retrieve() as $oLicense ) {
 			if ( !$oLicense->is_expired() ) {
 				$nLimit = $oLicense->activation_limit; // 0 == unlimited
 				if ( $nLimit <= 0 || $nLimit > $oLicense->activation_count ) {
@@ -54,11 +44,7 @@ class Find {
 		}
 
 		if ( empty( $oTheLicense ) ) {
-			$oRetriever = ( new Retrieve() )
-				->setEddCustomer( $this->getEddCustomer() )
-				->setEddDownload( $this->getEddDownload() );
-
-			foreach ( $oRetriever->retrieve() as $oLic ) {
+			foreach ( $this->retrieve() as $oLic ) {
 				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
 					$oTheLicense = $oLic;
 					break;
@@ -80,9 +66,6 @@ class Find {
 			'value'   => '%:"'.$sUrl.'";%',
 			'compare' => 'LIKE'
 		);
-		return ( new Retrieve() )
-			->setEddCustomer( $this->getEddCustomer() )
-			->setEddDownload( $this->getEddDownload() )
-			->retrieve( array(), $aMeta );
+		return $this->retrieve( array(), $aMeta );
 	}
 }
