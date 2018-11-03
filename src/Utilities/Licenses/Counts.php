@@ -2,39 +2,24 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
-use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
-use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
-
 /**
  * Ensure that you use reset() if anything changes.
  * Class Counts
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
  */
-class Counts {
-
-	use EddCustomerConsumer,
-		EddDownloadConsumer;
-
-	/**
-	 * @var array
-	 */
-	private $aLastResults;
+class Counts extends Retrieve {
 
 	/**
 	 * @return $this
 	 */
 	public function runCount() {
-		$oRetriever = ( new Retrieve() )
-			->setEddCustomer( $this->getEddCustomer() )
-			->setEddDownload( $this->getEddDownload() );
-
 		$nTotalActivationLimit = 0;
 		$nTotalActivationsNonExpired = 0;
 		$nTotalActivationsExpired = 0;
 		$nTotalActivationLimitExpired = 0;
 		$bUnlimited = false;
 
-		foreach ( $oRetriever->retrieve() as $oLicense ) {
+		foreach ( $this->retrieve() as $oLicense ) {
 
 			if ( $oLicense->is_expired() ) {
 				$nTotalActivationsExpired += $oLicense->activation_count;
@@ -51,13 +36,13 @@ class Counts {
 			}
 		}
 
-		$this->aLastResults = array(
+		$this->setLastResults( [
 			'unlimited'        => $bUnlimited,
 			'limit'            => $nTotalActivationLimit,
 			'assigned'         => $nTotalActivationsNonExpired,
 			'limit_expired'    => $nTotalActivationLimitExpired,
 			'assigned_expired' => $nTotalActivationsExpired,
-		);
+		] );
 		return $this;
 	}
 
@@ -108,20 +93,5 @@ class Counts {
 	 */
 	public function isUnlimited() {
 		return $this->getLastResults()[ 'unlimited' ];
-	}
-
-	/**
-	 * @return int[]
-	 */
-	public function getLastResults() {
-		return is_array( $this->aLastResults ) ? $this->aLastResults : array();
-	}
-
-	/**
-	 * @return $this
-	 */
-	public function reset() {
-		$this->aLastResults = array();
-		return $this;
 	}
 }

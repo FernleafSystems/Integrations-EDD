@@ -2,35 +2,20 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
-use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
-use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
-
 /**
  * Class Sites
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
  */
-class Sites {
-
-	use EddCustomerConsumer,
-		EddDownloadConsumer;
-
-	/**
-	 * @var array
-	 */
-	private $aLastResults;
+class Sites extends Retrieve {
 
 	/**
 	 * @return $this
 	 */
 	public function runLookup() {
-		$oRetriever = ( new Retrieve() )
-			->setEddCustomer( $this->getEddCustomer() )
-			->setEddDownload( $this->getEddDownload() );
-
 		$aAssignedSites = array();
 		$aAssignedSitesExpired = array();
 
-		foreach ( $oRetriever->retrieve() as $oLicense ) {
+		foreach ( $this->retrieve() as $oLicense ) {
 			if ( in_array( $oLicense->status, array( 'active', 'inactive' ) ) ) {
 				$aAssignedSites = array_merge( $aAssignedSites, $oLicense->sites );
 			}
@@ -39,10 +24,10 @@ class Sites {
 			}
 		}
 
-		$this->aLastResults = array(
+		$this->setLastResults( [
 			'sites'         => $aAssignedSites,
 			'sites_expired' => $aAssignedSitesExpired,
-		);
+		] );
 		return $this;
 	}
 
@@ -64,20 +49,13 @@ class Sites {
 	 * @return string[][]
 	 */
 	public function getLastResults() {
-		if ( empty( $this->aLastResults ) || !is_array( $this->aLastResults ) ) {
-			$this->aLastResults = array(
+		$aRes = parent::getLastResults();
+		if ( empty( $aRes ) ) {
+			$this->setLastResults( [
 				'sites'         => array(),
 				'sites_expired' => array(),
-			);
+			] );
 		}
-		return $this->aLastResults;
-	}
-
-	/**
-	 * @return $this
-	 */
-	public function reset() {
-		$this->aLastResults = array();
-		return $this;
+		return parent::getLastResults();
 	}
 }
