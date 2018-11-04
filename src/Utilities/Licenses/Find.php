@@ -33,9 +33,9 @@ class Find extends Retrieve {
 	public function withActiveSite( $sUrl, $bIncludeExpired = false ) {
 		$oTheLicense = null;
 
-		$aLicensesByMeta = $this->withActiveSiteUsingMetaQuery( $sUrl );
-		if ( !empty( $aLicensesByMeta ) ) {
-			foreach ( $aLicensesByMeta as $oLic ) {
+		$aLicensesBySite = $this->retrieve( [ 'site_name' => $sUrl ] );
+		if ( !empty( $aLicensesBySite ) ) {
+			foreach ( $aLicensesBySite as $oLic ) {
 				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
 					$oTheLicense = $oLic;
 					break;
@@ -43,6 +43,7 @@ class Find extends Retrieve {
 			}
 		}
 
+		// Do we need this at all? Also doesn't page results
 		if ( empty( $oTheLicense ) ) {
 			foreach ( $this->retrieve() as $oLic ) {
 				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
@@ -56,16 +57,11 @@ class Find extends Retrieve {
 	}
 
 	/**
-	 * Assumes the site url passed here is clean and ready to go
+	 * @deprecated unused
 	 * @param string $sUrl
 	 * @return \EDD_SL_License[]
 	 */
 	public function withActiveSiteUsingMetaQuery( $sUrl ) {
-		$aMeta = array(
-			'key'     => '_edd_sl_sites',
-			'value'   => '%:"'.$sUrl.'";%',
-			'compare' => 'LIKE'
-		);
-		return $this->retrieve( array(), $aMeta );
+		return $this->retrieve( [ 'site_name' => $sUrl ] );
 	}
 }
