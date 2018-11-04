@@ -16,10 +16,10 @@ class Sites extends Retrieve {
 		$aAssignedSitesExpired = array();
 
 		foreach ( $this->retrieve() as $oLicense ) {
-			if ( in_array( $oLicense->status, array( 'active', 'inactive' ) ) ) {
+			if ( in_array( $oLicense->status, [ 'active', 'inactive' ] ) ) {
 				$aAssignedSites = array_merge( $aAssignedSites, $oLicense->sites );
 			}
-			else {
+			else if ( $oLicense->status == 'expired' ) {
 				$aAssignedSitesExpired = array_merge( $aAssignedSitesExpired, $oLicense->sites );
 			}
 		}
