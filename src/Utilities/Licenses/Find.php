@@ -28,7 +28,7 @@ class Find extends Retrieve {
 	/**
 	 * @param string $sUrl
 	 * @param bool   $bIncludeExpired
-	 * @return \EDD_SL_License
+	 * @return \EDD_SL_License|null
 	 */
 	public function withActiveSite( $sUrl, $bIncludeExpired = false ) {
 		$oTheLicense = null;
@@ -43,15 +43,15 @@ class Find extends Retrieve {
 			}
 		}
 
-		// Do we need this at all? Also doesn't page results
-		if ( empty( $oTheLicense ) ) {
-			foreach ( $this->retrieve() as $oLic ) {
-				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
-					$oTheLicense = $oLic;
-					break;
-				}
-			}
-		}
+//		// Do we need this at all? Also doesn't page results
+//		if ( empty( $oTheLicense ) ) {
+//			foreach ( $this->retrieve() as $oLic ) {
+//				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
+//					$oTheLicense = $oLic;
+//					break;
+//				}
+//			}
+//		}
 
 		return $oTheLicense;
 	}
