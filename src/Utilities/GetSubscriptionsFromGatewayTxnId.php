@@ -36,6 +36,6 @@ class GetSubscriptionsFromGatewayTxnId {
 				$aSubs = ( new GetSubscriptionsFromPaymentId() )->retrieve( $nPaymentId );
 			}
 		}
-		return ( count( $aSubs ) == 1 ) ? array_shift( $aSubs ) : null;
+		return ( count( $aSubs ) > 0 ) ? array_shift( $aSubs ) : null;
 	}
 }
