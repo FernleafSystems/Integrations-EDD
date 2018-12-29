@@ -21,10 +21,21 @@ class GetSubscriptionsFromGatewayTxnId {
 				)
 			);
 
+		/**
+		 * For renewals, there is no obvious link between the TxnID and the Sub. So we need to
+		 * first grab the payment associated with the Txn, then if it has a parent, get this
+		 * and its associated subscription.
+		 */
 		if ( empty( $aSubs ) ) {
-			$aSubs = ( new GetSubscriptionsFromPaymentId() )
-				->retrieve( edd_get_purchase_id_by_transaction_id( $sTxnId ) );
+			$nPaymentId = edd_get_purchase_id_by_transaction_id( $sTxnId );
+			if ( !empty( $nPaymentId ) ) {
+				$oP = new \EDD_Payment( $nPaymentId );
+				if ( !empty( $oP->parent_payment ) ) {
+					$nPaymentId = $oP->parent_payment;
+				}
+				$aSubs = ( new GetSubscriptionsFromPaymentId() )->retrieve( $nPaymentId );
+			}
 		}
-		return ( count( $aSubs ) == 1 ) ? array_shift( $aSubs ) : null;
+		return ( count( $aSubs ) > 0 ) ? array_shift( $aSubs ) : null;
 	}
 }

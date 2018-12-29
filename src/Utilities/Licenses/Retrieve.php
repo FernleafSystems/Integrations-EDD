@@ -100,7 +100,7 @@ class Retrieve {
 		$aIds = ( new \EDD_SL_Activations_DB() )->get_activations(
 			[
 				'fields'    => 'license_id',
-				'site_name' => $sSiteName,
+				'site_name' => trailingslashit( $sSiteName ),
 			]
 		);
 		return $aIds;
