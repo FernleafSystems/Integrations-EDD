@@ -150,7 +150,7 @@ class DynamicLicenseLimits {
 	}
 
 	public function printLicenseLimitsCheckoutHeader() {
-		echo '<th class="edd_cart_extras">Site Licenses</th>';
+		echo '<th class="edd_cart_extras">How many licenses?</th>';
 	}
 
 	/**
