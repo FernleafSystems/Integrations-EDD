@@ -101,6 +101,7 @@ class Retrieve {
 			[
 				'fields'    => 'license_id',
 				'site_name' => trailingslashit( $sSiteName ),
+				'activated' => 1,
 			]
 		);
 		return $aIds;
