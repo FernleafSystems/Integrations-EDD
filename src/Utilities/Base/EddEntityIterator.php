@@ -36,11 +36,20 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 */
 	private $aQueryFilters;
 
-	public function __construct() {
-		$this->start();
+	/**
+	 * EddEntityIterator constructor.
+	 * @param bool $bStart - set to false if you need to setup custom query filters and manually start.
+	 */
+	public function __construct( $bStart = true ) {
+		if ( $bStart ) {
+			$this->start();
+		}
 	}
 
-	private function start() {
+	/**
+	 * Starts the iteration.
+	 */
+	public function start() {
 		$this->nCursor = -1;
 		$this->nPage = static::START_PAGE;
 		$this->runQuery();
