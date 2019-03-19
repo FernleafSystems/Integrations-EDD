@@ -68,6 +68,7 @@ class EddCustomerToFreeagentContact {
 			->setConnection( $this->getConnection() )
 			->setFirstName( $aNames[ 0 ] )
 			->setLastName( $aNames[ 1 ] )
+			->setEmail( $oCustomer->email )
 			->create();
 
 		$oCustomer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $oContact->getId() );
@@ -92,6 +93,7 @@ class EddCustomerToFreeagentContact {
 			->setLastName( $oOriginalContact->getLastName() )
 			->setConnection( $this->getConnection() )
 			->setEntityId( $this->getContact()->getId() )
+			->setEmail( $oPayment->email )
 			->setAddress_Line( $aUserInfo[ 'line1' ], 1 )
 			->setAddress_Line( $aUserInfo[ 'line2' ], 2 )
 			->setAddress_Town( $aUserInfo[ 'city' ] )
