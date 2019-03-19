@@ -48,11 +48,13 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 
 	/**
 	 * Starts the iteration.
+	 * @return $this
 	 */
 	public function start() {
 		$this->nCursor = -1;
 		$this->nPage = static::START_PAGE;
 		$this->runQuery();
+		return $this;
 	}
 
 	/**
@@ -85,7 +87,7 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 * @return $this
 	 */
 	public function setCustomQueryFilters( $aQuery ) {
-		if ( is_array( $this->aQueryFilters ) ) {
+		if ( is_array( $aQuery ) ) {
 			if ( isset( $aQuery[ 'number' ] ) && (int)$aQuery[ 'number' ] < 0 ) {
 				unset( $aQuery[ 'number' ] );
 			}
