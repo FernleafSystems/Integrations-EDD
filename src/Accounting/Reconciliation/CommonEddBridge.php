@@ -171,8 +171,17 @@ trait CommonEddBridge {
 	 * @return int
 	 */
 	public function getFreeagentContactIdFromEddPayment( $oEddPayment ) {
-		return $this->getEddCustomerFromEddPayment( $oEddPayment )
-					->get_meta( 'freeagent_contact_id' );
+		return $this->getFreeagentContactIdFromCustomer(
+			$this->getEddCustomerFromEddPayment( $oEddPayment )
+		);
+	}
+
+	/**
+	 * @param \EDD_Customer $oCustomer
+	 * @return int
+	 */
+	public function getFreeagentContactIdFromCustomer( $oCustomer ) {
+		return $oCustomer->get_meta( 'freeagent_contact_id' );
 	}
 
 	/**
