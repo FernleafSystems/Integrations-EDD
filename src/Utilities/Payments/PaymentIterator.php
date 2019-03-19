@@ -28,15 +28,6 @@ class PaymentIterator extends EddEntityIterator {
 	}
 
 	/**
-	 * @return array
-	 */
-	protected function getDefaultQueryFilters() {
-		$aQ = parent::getDefaultQueryFilters();
-		$aQ[ 'page' ] = $this->getPage();
-		return $aQ;
-	}
-
-	/**
 	 */
 	protected function runQuery() {
 		$this->setCurrentPageResults(

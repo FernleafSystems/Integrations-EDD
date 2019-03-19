@@ -12,7 +12,7 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
  */
 class CustomerIterator extends EddEntityIterator {
 
-	const START_PAGE = 0;
+	const PAGINATION_TYPE = 'offset';
 
 	/**
 	 * @return \EDD_Customer|null
@@ -22,24 +22,15 @@ class CustomerIterator extends EddEntityIterator {
 	}
 
 	/**
-	 * @return array
-	 */
-	protected function getDefaultQueryFilters() {
-		$aQ = parent::getDefaultQueryFilters();
-		$aQ[ 'offset' ] = $this->getPage()*static::PER_PAGE;
-		return $aQ;
-	}
-
-	/**
 	 */
 	protected function runQuery() {
 		$this->setCurrentPageResults(
-			array_values( array_map(
-				function ( $oCustomerStdClass ) {
-					return new \EDD_Customer( $oCustomerStdClass->id );
+			array_map(
+				function ( $oStdClass ) {
+					return new \EDD_Customer( $oStdClass->id );
 				},
 				( new \EDD_Customer_Query() )->query( $this->getFinalQueryFilters() )
-			) )
+			)
 		);
 	}
 

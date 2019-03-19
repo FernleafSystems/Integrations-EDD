@@ -8,8 +8,8 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Base;
  */
 abstract class EddEntityIterator implements \Countable, \Iterator {
 
-	const PER_PAGE = 50;
-	const START_PAGE = 1;
+	const DEFAULT_PER_PAGE = 50;
+	const PAGINATION_TYPE = 'page';
 
 	/**
 	 * @var int
@@ -52,7 +52,7 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 */
 	public function start() {
 		$this->nCursor = -1;
-		$this->nPage = static::START_PAGE;
+		$this->nPage = $this->getStartPage();
 		$this->runQuery();
 		return $this;
 	}
@@ -68,11 +68,24 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 * @return array
 	 */
 	protected function getDefaultQueryFilters() {
-		return [
+		$aDefaults = [
 			'orderby' => 'ID',
 			'order'   => 'ASC',
-			'number'  => static::PER_PAGE,
+			'number'  => static::DEFAULT_PER_PAGE,
 		];
+
+		switch ( static::PAGINATION_TYPE ) {
+			case 'offset':
+				$aDefaults[ 'offset' ] = $this->getPage()*$this->getPerPage();
+				break;
+
+			case 'page':
+			default:
+				$aDefaults[ 'page' ] = $this->getPage();
+				break;
+		}
+
+		return $aDefaults;
 	}
 
 	/**
@@ -80,6 +93,24 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 */
 	protected function getFinalQueryFilters() {
 		return array_merge( $this->getDefaultQueryFilters(), $this->getCustomQueryFilters() );
+	}
+
+	/**
+	 * @return int
+	 */
+	protected function getStartPage() {
+		switch ( static::PAGINATION_TYPE ) {
+
+			case 'offset':
+				$nStart = 0;
+				break;
+
+			case 'page':
+			default:
+				$nStart = 1;
+				break;
+		}
+		return $nStart;
 	}
 
 	/**
@@ -111,7 +142,7 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 * @return int
 	 */
 	protected function getPage() {
-		return max( static::START_PAGE, (int)$this->nPage );
+		return max( $this->getStartPage(), (int)$this->nPage );
 	}
 
 	/**
@@ -119,7 +150,7 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 */
 	public function getPerPage() {
 		$aQ = $this->getCustomQueryFilters();
-		return isset( $aQ[ 'number' ] ) ? $aQ[ 'number' ] : static::PER_PAGE;
+		return isset( $aQ[ 'number' ] ) ? $aQ[ 'number' ] : static::DEFAULT_PER_PAGE;
 	}
 
 	/**
@@ -147,7 +178,7 @@ abstract class EddEntityIterator implements \Countable, \Iterator {
 	 * @return $this
 	 */
 	protected function setCurrentPageResults( $aPageResults ) {
-		$this->aCurrentPage = $aPageResults;
+		$this->aCurrentPage = array_values( $aPageResults );
 		return $this;
 	}
 
