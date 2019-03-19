@@ -105,7 +105,7 @@ class CustomerIterator implements \Countable, \Iterator {
 	 */
 	public function next() {
 		$this->nCursor++;
-		if ( ( $this->nCursor%$this->getPerPage() ) == 0 ) {
+		if ( $this->nCursor > 0 && ( $this->nCursor%$this->getPerPage() ) == 0 ) {
 			$this->nPage++;
 			$this->runQuery();
 		}
