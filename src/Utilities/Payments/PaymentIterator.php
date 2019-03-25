@@ -28,6 +28,23 @@ class PaymentIterator extends EddEntityIterator {
 	}
 
 	/**
+	 * @param string|array $sStatus
+	 * @return $this
+	 */
+	public function filterByStatus( $sStatus ) {
+		return $this->setCustomQueryFilter( 'status', $sStatus );
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getDefaultQueryFilters() {
+		$aDefs = parent::getDefaultQueryFilters();
+		$aDefs[ 'status' ] = 'all';
+		return $aDefs;
+	}
+
+	/**
 	 */
 	protected function runQuery() {
 		$this->setCurrentPageResults(
@@ -42,6 +59,12 @@ class PaymentIterator extends EddEntityIterator {
 		$aCounts = (array)wp_count_posts( 'edd_payment' );
 		$aFil = $this->getFinalQueryFilters();
 		$aStati = isset( $aFil[ 'status' ] ) ? isset( $aFil[ 'status' ] ) : edd_get_payment_status_keys();
-		return array_sum( array_intersect_key( $aCounts, array_flip( $aStati ) ) );
+		if ( is_string( $aStati ) ) {
+			$aStati = array_map( 'trim', explode( ',', $aStati ) );
+		}
+		if ( !in_array( 'all', $aStati ) ) {
+			$aCounts = array_intersect_key( $aCounts, array_flip( $aStati ) );
+		}
+		return array_sum( $aCounts );
 	}
 }
