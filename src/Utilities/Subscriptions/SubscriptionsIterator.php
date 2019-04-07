@@ -2,7 +2,7 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Subscriptions;
 
-use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
+use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Subscriptions_DB) uses "offset" to paginate
@@ -10,9 +10,7 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
  * Class SubscriptionsIterator
  * @package FernleafSystems\Integrations\Edd\Utilities\Subscriptions
  */
-class SubscriptionsIterator extends EddEntityIterator {
-
-	const PAGINATION_TYPE = 'offset';
+class SubscriptionsIterator extends CommonEntityIterator {
 
 	/**
 	 * @return \EDD_Subscription|null
@@ -46,11 +44,10 @@ class SubscriptionsIterator extends EddEntityIterator {
 	}
 
 	/**
+	 * @return \EDD_Subscription[]
 	 */
 	protected function runQuery() {
-		$this->setCurrentPageResults(
-			( new \EDD_Subscriptions_DB() )->get_subscriptions( $this->getFinalQueryFilters() )
-		);
+		return ( new \EDD_Subscriptions_DB() )->get_subscriptions( $this->getFinalQueryFilters() );
 	}
 
 	/**

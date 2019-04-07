@@ -2,7 +2,7 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Payments;
 
-use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
+use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Payments_Query) uses "page" to paginate
@@ -10,7 +10,9 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
  * Class PaymentIterator
  * @package FernleafSystems\Integrations\Edd\Utilities\Payments
  */
-class PaymentIterator extends EddEntityIterator {
+class PaymentIterator extends CommonEntityIterator {
+
+	const PAGINATION_TYPE = 'page';
 
 	/**
 	 * @return \EDD_Payment|null
@@ -45,11 +47,10 @@ class PaymentIterator extends EddEntityIterator {
 	}
 
 	/**
+	 * @return \EDD_Payment[]
 	 */
 	protected function runQuery() {
-		$this->setCurrentPageResults(
-			( new \EDD_Payments_Query( $this->getFinalQueryFilters() ) )->get_payments()
-		);
+		return ( new \EDD_Payments_Query( $this->getFinalQueryFilters() ) )->get_payments();
 	}
 
 	/**
