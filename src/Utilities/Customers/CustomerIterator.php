@@ -2,7 +2,7 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Customers;
 
-use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
+use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Customer_Query) uses "offset" to paginate
@@ -10,9 +10,7 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\EddEntityIterator;
  * Class CustomerIterator
  * @package FernleafSystems\Integrations\Edd\Utilities\Customers
  */
-class CustomerIterator extends EddEntityIterator {
-
-	const PAGINATION_TYPE = 'offset';
+class CustomerIterator extends CommonEntityIterator {
 
 	/**
 	 * @return \EDD_Customer|null
@@ -22,15 +20,14 @@ class CustomerIterator extends EddEntityIterator {
 	}
 
 	/**
+	 * @return \EDD_Customer[]
 	 */
 	protected function runQuery() {
-		$this->setCurrentPageResults(
-			array_map(
-				function ( $oStdClass ) {
-					return new \EDD_Customer( $oStdClass->id );
-				},
-				( new \EDD_Customer_Query() )->query( $this->getFinalQueryFilters() )
-			)
+		return array_map(
+			function ( $oStdClass ) {
+				return new \EDD_Customer( $oStdClass->id );
+			},
+			( new \EDD_Customer_Query() )->query( $this->getFinalQueryFilters() )
 		);
 	}
 
