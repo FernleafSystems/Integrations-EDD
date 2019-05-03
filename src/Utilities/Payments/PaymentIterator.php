@@ -59,7 +59,7 @@ class PaymentIterator extends CommonEntityIterator {
 	protected function runQueryCount() {
 		$aCounts = (array)wp_count_posts( 'edd_payment' );
 		$aFil = $this->getFinalQueryFilters();
-		$aStati = isset( $aFil[ 'status' ] ) ? isset( $aFil[ 'status' ] ) : edd_get_payment_status_keys();
+		$aStati = isset( $aFil[ 'status' ] ) ? $aFil[ 'status' ] : edd_get_payment_status_keys();
 		if ( is_string( $aStati ) ) {
 			$aStati = array_map( 'trim', explode( ',', $aStati ) );
 		}
