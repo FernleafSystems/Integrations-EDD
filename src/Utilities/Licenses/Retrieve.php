@@ -28,14 +28,14 @@ class Retrieve {
 	 * @return array
 	 */
 	public function getLastResults() {
-		return is_array( $this->aLastResults ) ? $this->aLastResults : array();
+		return is_array( $this->aLastResults ) ? $this->aLastResults : [];
 	}
 
 	/**
 	 * @return $this
 	 */
 	public function reset() {
-		$this->aLastResults = array();
+		$this->aLastResults = [];
 		return $this;
 	}
 
@@ -43,7 +43,7 @@ class Retrieve {
 	 * @param array $aExtraParams
 	 * @return \EDD_SL_License[]
 	 */
-	public function retrieve( $aExtraParams = array() ) {
+	public function retrieve( $aExtraParams = [] ) {
 		return array_map(
 			function ( $nLicenseId ) {
 				return new \EDD_SL_License( $nLicenseId );
@@ -56,7 +56,7 @@ class Retrieve {
 	 * @param array $aExtraParams
 	 * @return int[] - license IDs
 	 */
-	public function runQuery( $aExtraParams = array() ) {
+	public function runQuery( $aExtraParams = [] ) {
 
 		if ( !empty( $aExtraParams[ 'site_name' ] ) ) {
 			/**
@@ -74,10 +74,10 @@ class Retrieve {
 		}
 
 		$aParams = array_merge(
-			array(
+			[
 				'status' => $this->getStatusesForQuery(),
 				'fields' => 'ids',
-			),
+			],
 			$aExtraParams
 		);
 
@@ -89,7 +89,7 @@ class Retrieve {
 		}
 
 		$aIds = edd_software_licensing()->licenses_db->get_licenses( $aParams );
-		return is_array( $aIds ) ? $aIds : array();
+		return is_array( $aIds ) ? $aIds : [];
 	}
 
 	/**

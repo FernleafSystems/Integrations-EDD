@@ -26,14 +26,14 @@ class StripeEddBridge extends StripeBridge {
 		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $oItem->getTotal() != $oCharge->getAmount_Gross() ) {
+		if ( $oItem->price != $oCharge->getAmount_Gross() ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		return $oCharge->setItemName( $oItem->getName() )
+		return $oCharge->setItemName( $oItem->name )
 					   ->setItemPeriodType( $sPeriod )
-					   ->setItemQuantity( $oItem->getQuantity() )
-					   ->setItemSubtotal( $oItem->getSubtotal() )
+					   ->setItemQuantity( $oItem->quantity )
+					   ->setItemSubtotal( $oItem->subtotal )
 					   ->setItemTaxRate( $oItem->getTaxRate() )
 					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
 					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );

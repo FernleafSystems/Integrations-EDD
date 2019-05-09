@@ -12,14 +12,14 @@ class ProcessAll {
 	 * @param callable $cProcessFunction
 	 * @param array    $aQueryOptions
 	 */
-	public function process( $cProcessFunction, $aQueryOptions = array() ) {
+	public function process( $cProcessFunction, $aQueryOptions = [] ) {
 
 		$aQueryOptions = array_merge(
-			array(
+			[
 				'orderby' => 'ID',
 				'order'   => 'ASC',
 				'page'    => 1,
-			),
+			],
 			$aQueryOptions
 		);
 

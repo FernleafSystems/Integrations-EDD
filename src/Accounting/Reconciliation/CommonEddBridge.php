@@ -50,7 +50,7 @@ trait CommonEddBridge {
 	 */
 	public function getFreeagentInvoiceId( $oCharge ) {
 		$aIds = $this->getFreeagentInvoiceIdsFromEddPayment( $this->getEddPaymentFromCharge( $oCharge ) );
-		return isset( $aIds[ $oCharge->getId() ] ) ? $aIds[ $oCharge->getId() ] : null;
+		return isset( $aIds[ $oCharge->id ] ) ? $aIds[ $oCharge->id ] : null;
 	}
 
 	/**
@@ -163,7 +163,7 @@ trait CommonEddBridge {
 	 * @return \EDD_Payment|null
 	 */
 	protected function getEddPaymentFromCharge( $oCharge ) {
-		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $oCharge->getId() );
+		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $oCharge->id );
 	}
 
 	/**
@@ -190,7 +190,7 @@ trait CommonEddBridge {
 	 */
 	public function getFreeagentInvoiceIdsFromEddPayment( $oEddPayment ) {
 		$aIds = $oEddPayment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
-		return is_array( $aIds ) ? $aIds : array();
+		return is_array( $aIds ) ? $aIds : [];
 	}
 
 	/**
@@ -227,7 +227,7 @@ trait CommonEddBridge {
 	 * @return array
 	 */
 	protected function getTaxCountriesRates() {
-		$aCountriesToRates = array();
+		$aCountriesToRates = [];
 		foreach ( edd_get_tax_rates() as $aCountryRate ) {
 			if ( !empty( $aCountryRate[ 'country' ] ) ) {
 				$aCountriesToRates[ $aCountryRate[ 'country' ] ] = $aCountryRate[ 'rate' ];

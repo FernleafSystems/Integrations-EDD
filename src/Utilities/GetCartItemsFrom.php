@@ -23,7 +23,7 @@ class GetCartItemsFrom {
 	 * @return CartItemVo[]
 	 */
 	public function transactionId( $sGatewayTxnId ) {
-		$aCartItems = array();
+		$aCartItems = [];
 
 		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sGatewayTxnId );
 		if ( empty( $nPaymentId ) ) {
@@ -59,7 +59,7 @@ class GetCartItemsFrom {
 	 * @return CartItemVo[]
 	 */
 	protected function convertToCartItemVo( $nPaymentId, $nProductId = null ) {
-		$aItems = array();
+		$aItems = [];
 
 		foreach ( ( new \EDD_Payment( $nPaymentId ) )->cart_details as $aCartItem ) {
 			if ( empty( $nProductId ) || $aCartItem[ 'id' ] == $nProductId ) {

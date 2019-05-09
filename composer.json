@@ -21,8 +21,9 @@
   "require":           {
     "php":                                           ">=5.6.0",
     "fernleafsystems/utilities":                     "^1.0",
-    "fernleafsystems/integrations-stripe-freeagent": "^0.6.1",
-    "fernleafsystems/integrations-paypal-freeagent": "~0.0.2"
+    "fernleafsystems/integrations-freeagent":        "^0.1.0",
+    "fernleafsystems/integrations-stripe-freeagent": "^0.7.0",
+    "fernleafsystems/integrations-paypal-freeagent": "~0.1.0"
   },
   "require-dev":       {
   },
