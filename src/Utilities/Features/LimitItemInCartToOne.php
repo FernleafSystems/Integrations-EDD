@@ -26,7 +26,7 @@ class LimitItemInCartToOne {
 		};
 
 		// After an item has been added to the cart, it'll traverse all items and remove duplicates
-		add_action( 'edd_post_add_to_cart', array( $this, 'onAddToCart' ), 10, 1 );
+		add_action( 'edd_post_add_to_cart', [ $this, 'onAddToCart' ], 10, 1 );
 	}
 
 	/**
@@ -71,6 +71,6 @@ class LimitItemInCartToOne {
 	 */
 	protected function isEnabledLimitToOne( $nDownloadId ) {
 		$oDld = new \EDD_Download( $nDownloadId );
-		return $oDld->ID && get_field( 'limit_to_one', $oDld, false );
+		return $oDld->ID && \get_field( 'limit_to_one', $oDld, false );
 	}
 }

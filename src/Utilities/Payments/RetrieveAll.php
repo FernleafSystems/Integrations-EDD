@@ -12,15 +12,15 @@ class RetrieveAll {
 	 * @param array $aQueryOptions
 	 * @return \EDD_Payment[]
 	 */
-	public function retrieve( $aQueryOptions = array() ) {
-		$aAll = array();
+	public function retrieve( $aQueryOptions = [] ) {
+		$aAll = [];
 
 		$aQueryOptions = array_merge(
-			array(
+			[
 				'orderby' => 'ID',
 				'order'   => 'ASC',
 				'page'    => 1,
-			),
+			],
 			$aQueryOptions
 		);
 

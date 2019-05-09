@@ -57,9 +57,9 @@ class Find extends Retrieve {
 	}
 
 	/**
-	 * @deprecated unused
 	 * @param string $sUrl
 	 * @return \EDD_SL_License[]
+	 * @deprecated unused
 	 */
 	public function withActiveSiteUsingMetaQuery( $sUrl ) {
 		return $this->retrieve( [ 'site_name' => $sUrl ] );

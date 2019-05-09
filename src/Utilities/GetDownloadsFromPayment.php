@@ -26,11 +26,11 @@ class GetDownloadsFromPayment {
 
 	/**
 	 * @param \EDD_Payment $oPayment
-	 * @param string $sToExtract
+	 * @param string       $sToExtract
 	 * @return array
 	 */
 	public function retrieve( $oPayment, $sToExtract ) {
-		$aDownloads = array();
+		$aDownloads = [];
 		foreach ( $oPayment->downloads as $aDownload ) {
 			/** @var array $aDownload */
 			switch ( $sToExtract ) {

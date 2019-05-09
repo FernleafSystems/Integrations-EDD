@@ -12,7 +12,6 @@ use FernleafSystems\Integrations\Paypal_Freeagent\Reconciliation\Bridge\PaypalBr
 class PaypalEddBridge extends PaypalBridge {
 
 	use CommonEddBridge;
-
 	const PAYMENTMETA_EXT_BANK_TXN_ID = 'icwpeddpaypalbridge_ext_bank_tx_id';
 	const PAYMENTMETA_EXT_BILL_ID = 'icwpeddpaypalbridge_ext_bill_id';
 

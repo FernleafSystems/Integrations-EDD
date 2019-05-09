@@ -15,9 +15,9 @@ class GetSubscriptionsFromPaymentId {
 	public function retrieve( $nPaymentId ) {
 		return ( new \EDD_Subscriptions_DB() )
 			->get_subscriptions(
-				array(
+				[
 					'parent_payment_id' => $nPaymentId
-				)
+				]
 			);
 	}
 }

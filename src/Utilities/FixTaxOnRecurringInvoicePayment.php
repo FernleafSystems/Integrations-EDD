@@ -29,11 +29,11 @@ class FixTaxOnRecurringInvoicePayment {
 				$oPayment->remove_download( $aCartItem[ 'id' ] );
 				$oPayment->add_download(
 					$aCartItem[ 'id' ],
-					array(
+					[
 						'item_price' => $nNewItemPrice,
 						'price_id'   => $nPriceId,
 						'tax'        => $nNewTax,
-					)
+					]
 				);
 
 				$oPayment->tax = $nOriginalPaymentTaxRate;

@@ -16,9 +16,9 @@ class GetSubscriptionsFromGatewayTxnId {
 	public function retrieve( $sTxnId ) {
 		$aSubs = ( new \EDD_Subscriptions_DB() )
 			->get_subscriptions(
-				array(
+				[
 					'transaction_id' => $sTxnId
-				)
+				]
 			);
 
 		/**

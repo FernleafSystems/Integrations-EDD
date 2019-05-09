@@ -12,8 +12,8 @@ class Sites extends Retrieve {
 	 * @return $this
 	 */
 	public function runLookup() {
-		$aAssignedSites = array();
-		$aAssignedSitesExpired = array();
+		$aAssignedSites = [];
+		$aAssignedSitesExpired = [];
 
 		foreach ( $this->retrieve() as $oLicense ) {
 			if ( in_array( $oLicense->status, [ 'active', 'inactive' ] ) ) {
@@ -52,8 +52,8 @@ class Sites extends Retrieve {
 		$aRes = parent::getLastResults();
 		if ( empty( $aRes ) ) {
 			$this->setLastResults( [
-				'sites'         => array(),
-				'sites_expired' => array(),
+				'sites'         => [],
+				'sites_expired' => [],
 			] );
 		}
 		return parent::getLastResults();

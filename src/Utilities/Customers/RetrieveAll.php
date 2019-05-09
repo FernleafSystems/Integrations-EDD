@@ -12,8 +12,8 @@ class RetrieveAll {
 	 * @param array $aQueryOptions
 	 * @return \EDD_Customer[]
 	 */
-	public function retrieve( $aQueryOptions = array() ) {
-		$aAll = array();
+	public function retrieve( $aQueryOptions = [] ) {
+		$aAll = [];
 
 		$nPerPage = 20; // default anyway
 		if ( isset( $aQueryOptions[ 'per_page' ] ) ) {
@@ -22,12 +22,12 @@ class RetrieveAll {
 		}
 
 		$aQueryOptions = array_merge(
-			array(
+			[
 				'orderby' => 'id',
 				'order'   => 'ASC',
 				'number'  => $nPerPage,
 				'offset'  => 0,
-			),
+			],
 			$aQueryOptions
 		);
 
@@ -35,9 +35,9 @@ class RetrieveAll {
 		do {
 			$aQueryOptions = array_merge(
 				$aQueryOptions,
-				array(
+				[
 					'offset' => $nPage*$nPerPage,
-				)
+				]
 			);
 
 			$nCountBefore = count( $aAll );
