@@ -8,6 +8,11 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Features;
  */
 class DynamicLicenseLimits {
 
+	/**
+	 * @var bool
+	 */
+	private $bCartContainsDynamicLicenses = false;
+
 	public function run() {
 		$this->setup();
 	}
@@ -18,6 +23,7 @@ class DynamicLicenseLimits {
 		};
 
 		add_action( 'wp_footer', [ $this, 'printJsHandler' ] );
+		add_action( 'edd_cart_items_before', [ $this, 'determineDynamicLicensesNeeded' ] );
 		add_action( 'edd_checkout_table_header_first', [ $this, 'printLicenseLimitsCheckoutHeader' ] );
 		add_action( 'edd_checkout_table_body_first', [ $this, 'printLicenseLimitsQuantitiesInput' ] );
 
@@ -76,34 +82,36 @@ class DynamicLicenseLimits {
 	}
 
 	public function printJsHandler() {
-		echo '
-		<script type="text/javascript">
-
-			jQuery(document.body).on("change", ".edd-item-dynamic_license_quantity", function(){
-				var $oThis = jQuery( this );
-				$oThis.prop( "disabled", true );
-				var nValue = $oThis.val();
-				nValue = nValue.replace( /[^0-9]/g, "" );
-				if ( nValue.length === 0 || nValue === "0" ) {
-					nValue = 1;
-				}
-				$oThis.val( nValue );
-				
-				var postData = {
-					action: "update_dlq",
-					quantity: nValue,
-					download_id: $oThis.data("dld-id")
-				};
-				
-				jQuery.post( edd_global_vars.ajaxurl, postData,
-					function ( oResponse ) { }
-				)
-				.always( function () {
-					recalculate_taxes();
-					$oThis.prop( "disabled", false );
-				} );
-		} );
-		</script>';
+		if ( $this->bCartContainsDynamicLicenses ) {
+			echo '
+			<script type="text/javascript">
+	
+				jQuery(document.body).on("change", ".edd-item-dynamic_license_quantity", function(){
+					var $oThis = jQuery( this );
+					$oThis.prop( "disabled", true );
+					var nValue = $oThis.val();
+					nValue = nValue.replace( /[^0-9]/g, "" );
+					if ( nValue.length === 0 || nValue === "0" ) {
+						nValue = 1;
+					}
+					$oThis.val( nValue );
+					
+					var postData = {
+						action: "update_dlq",
+						quantity: nValue,
+						download_id: $oThis.data("dld-id")
+					};
+					
+					jQuery.post( edd_global_vars.ajaxurl, postData,
+						function ( oResponse ) { }
+					)
+					.always( function () {
+						recalculate_taxes();
+						$oThis.prop( "disabled", false );
+					} );
+			} );
+			</script>';
+		}
 	}
 
 	/**
@@ -149,29 +157,44 @@ class DynamicLicenseLimits {
 		return $aCartItem;
 	}
 
+	/**
+	 * determine whether there are any items in the card that have dynamic licenses enabled
+	 * and sets the flag accordingly.
+	 */
+	public function determineDynamicLicensesNeeded() {
+		$this->bCartContainsDynamicLicenses = false;
+		foreach ( edd_get_cart_contents() as $aItem ) {
+			if ( isset( $aItem[ 'id' ] ) && $this->isEnabledDynamicLicenseLimits( $aItem[ 'id' ] ) ) {
+				$this->bCartContainsDynamicLicenses = true;
+				break;
+			}
+		}
+	}
+
 	public function printLicenseLimitsCheckoutHeader() {
-		echo '<th class="edd_cart_extras">How many licenses?</th>';
+		if ( $this->bCartContainsDynamicLicenses ) {
+			echo '<th class="edd_cart_extras">How many licenses?</th>';
+		}
 	}
 
 	/**
 	 * @param array $aItem
 	 */
 	public function printLicenseLimitsQuantitiesInput( $aItem ) {
-		echo '<td>';
 
-		if ( $this->isEnabledDynamicLicenseLimits( $aItem[ 'id' ] ) ) {
-			$nLicQuantity = $aItem[ 'options' ][ 'dynamic_license_limit' ];
-			echo '<input type="text" min="1" step="1"
-			name="edd-cart-download-dynamic_license_quantity"
-			data-dld-id="'.$aItem[ 'id' ].'" style="max-width: 110px;"
-			data-key="dynamic_license_quanity" class="edd-input edd-item-dynamic_license_quantity"
-			value="'.$nLicQuantity.'" />';
+		if ( $this->bCartContainsDynamicLicenses ) {
+			if ( $this->isEnabledDynamicLicenseLimits( $aItem[ 'id' ] ) ) {
+				$nLicQuantity = $aItem[ 'options' ][ 'dynamic_license_limit' ];
+				echo '<td><input type="text" min="1" step="1"
+				name="edd-cart-download-dynamic_license_quantity"
+				data-dld-id="'.$aItem[ 'id' ].'" style="max-width: 110px;"
+				data-key="dynamic_license_quanity" class="edd-input edd-item-dynamic_license_quantity"
+				value="'.$nLicQuantity.'" /></td>';
+			}
+			else {
+				echo '<td>Not Available</td>';
+			}
 		}
-		else {
-			echo 'Not Available';
-		}
-
-		echo '</td>';
 	}
 
 	/**
