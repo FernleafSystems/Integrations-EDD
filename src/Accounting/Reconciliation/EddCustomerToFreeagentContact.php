@@ -114,6 +114,7 @@ class EddCustomerToFreeagentContact {
 	 */
 	protected function getCountryNameFromIso2Code( $sCode ) {
 		$aCountries = edd_get_country_list();
+		$aCountries[ 'HR' ] = 'Croatia'; // bug when country name is Croatia/Hrvatska and FreeAgent doesn't understand
 		return isset( $aCountries[ $sCode ] ) ? $aCountries[ $sCode ] : $sCode;
 	}
 

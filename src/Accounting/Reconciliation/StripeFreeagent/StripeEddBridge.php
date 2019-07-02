@@ -23,6 +23,11 @@ class StripeEddBridge extends StripeBridge {
 		$oItem = $this->getCartItemDetailsFromGatewayTxn( $sTxnID );
 
 		$sPeriod = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID )->period;
+		if ( empty( $sPeriod ) ) {
+//			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $sTxnID ) );
+			$sPeriod = 'year';
+		}
 		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
 
 		// Sanity
