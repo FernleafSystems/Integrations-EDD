@@ -27,12 +27,15 @@ class PaypalEddBridge extends PaypalBridge {
 
 		$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID );
 		if ( empty( $oSub->period ) ) {
-//			var_dump( $sTxnID );
-//			var_dump( $oSub );
-			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
+//			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $sTxnID ) );
+			$sPeriod = 'year';
+		}
+		else {
+			$sPeriod = $oSub->period;
 		}
 
-		$sPeriod = ucfirst( strtolower( $oSub->period.'s' ) ); // e.g. year -> Years
+		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
 
 		// Sanity
 		if ( $oItem->getTotal() != $oCharge->getAmount_Gross() ) {
