@@ -60,7 +60,7 @@ class EddCustomerToFreeagentContact {
 	protected function createNewFreeagentContact() {
 		$oCustomer = $this->getCustomer();
 		$aNames = explode( ' ', $oCustomer->name, 2 );
-		if ( !isset( $aNames[ 1 ] ) ) {
+		if ( empty( $aNames[ 1 ] ) ) {
 			$aNames[ 1 ] = 'Surname-Unknown';
 		}
 
