@@ -4,10 +4,9 @@ namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\PaypalFreea
 
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
-use FernleafSystems\Integrations\Edd\Utilities\GetEddPaymentFromGatewayTxnId;
-use FernleafSystems\Integrations\Edd\Utilities\GetSubscriptionsFromGatewayTxnId;
+use FernleafSystems\Integrations\Edd\Utilities;
 use FernleafSystems\Integrations\Freeagent\DataWrapper;
-use FernleafSystems\Integrations\Paypal_Freeagent\Reconciliation\Bridge\PaypalBridge;
+use FernleafSystems\Integrations\Freeagent\Service\PayPal\PaypalBridge;
 
 class PaypalEddBridge extends PaypalBridge {
 
@@ -25,7 +24,7 @@ class PaypalEddBridge extends PaypalBridge {
 
 		$oItem = $this->getCartItemDetailsFromGatewayTxn( $sTxnID );
 
-		$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID );
+		$oSub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID );
 		if ( empty( $oSub->period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
 			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $sTxnID ) );
@@ -38,14 +37,14 @@ class PaypalEddBridge extends PaypalBridge {
 		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $oItem->getTotal() != $oCharge->getAmount_Gross() ) {
+		if ( $oItem->price != $oCharge->getAmount_Gross() ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		return $oCharge->setItemName( $oItem->getName() )
+		return $oCharge->setItemName( $oItem->name )
 					   ->setItemPeriodType( $sPeriod )
-					   ->setItemQuantity( $oItem->getQuantity() )
-					   ->setItemSubtotal( $oItem->getSubtotal() )
+					   ->setItemQuantity( $oItem->quantity )
+					   ->setItemSubtotal( $oItem->subtotal )
 					   ->setItemTaxRate( $oItem->getTaxRate() )
 					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
 					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
@@ -56,8 +55,8 @@ class PaypalEddBridge extends PaypalBridge {
 	 * @return int|null
 	 */
 	public function getExternalBankTxnId( $oPayout ) {
-		return ( new GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->getId() )
+		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )
+			->retrieve( $oPayout->id )
 			->get_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID );
 	}
 
@@ -66,8 +65,8 @@ class PaypalEddBridge extends PaypalBridge {
 	 * @return int|null
 	 */
 	public function getExternalBillId( $oPayout ) {
-		return ( new GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->getId() )
+		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )
+			->retrieve( $oPayout->id )
 			->get_meta( static::PAYMENTMETA_EXT_BILL_ID );
 	}
 
@@ -77,8 +76,8 @@ class PaypalEddBridge extends PaypalBridge {
 	 * @return $this
 	 */
 	public function storeExternalBankTxnId( $oPayout, $oBankTxn ) {
-		( new GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->getId() )
+		( new Utilities\GetEddPaymentFromGatewayTxnId() )
+			->retrieve( $oPayout->id )
 			->update_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID, $oBankTxn->getId() );
 		return $this;
 	}
@@ -89,8 +88,8 @@ class PaypalEddBridge extends PaypalBridge {
 	 * @return $this
 	 */
 	public function storeExternalBillId( $oPayout, $oBill ) {
-		( new GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->getId() )
+		( new Utilities\GetEddPaymentFromGatewayTxnId() )
+			->retrieve( $oPayout->id )
 			->update_meta( static::PAYMENTMETA_EXT_BILL_ID, $oBill->getId() );
 		return $this;
 	}

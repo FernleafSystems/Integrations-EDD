@@ -6,7 +6,7 @@ use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
 use FernleafSystems\Integrations\Edd\Utilities\GetSubscriptionsFromGatewayTxnId;
 use FernleafSystems\Integrations\Freeagent\DataWrapper;
-use FernleafSystems\Integrations\Stripe_Freeagent\Reconciliation\Bridge\StripeBridge;
+use FernleafSystems\Integrations\Freeagent\Service\Stripe\StripeBridge;
 
 class StripeEddBridge extends StripeBridge {
 
