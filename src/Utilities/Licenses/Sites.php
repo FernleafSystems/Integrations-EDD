@@ -5,6 +5,7 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 /**
  * Class Sites
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
+ * @deprecated - use EnumerateSites
  */
 class Sites extends Retrieve {
 
