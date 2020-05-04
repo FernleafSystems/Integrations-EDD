@@ -6,6 +6,7 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
  * Ensure that you use reset() if anything changes.
  * Class Counts
  * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
+ * @deprecated - use ActivationCounts
  */
 class Counts extends Retrieve {
 
