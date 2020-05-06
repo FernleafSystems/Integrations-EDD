@@ -22,14 +22,16 @@ class LocateViableLicense {
 	 * @param string $sUrl
 	 * @return \EDD_SL_License|null
 	 */
-	public function transfer( $sUrl ) :?\EDD_SL_License {
-		$oNewLicHome = null;
+	public function locate( $sUrl ) :?\EDD_SL_License {
+		$oLicHome = null;
+
+		$oC = $this->getEddCustomer();
 
 		$aActive = [];
 		$aExpired = [];
 		foreach ( ( new Retrieve() )->forUrl( $sUrl ) as $oAct ) {
 			$oLic = new \EDD_SL_License( $oAct->license_id );
-			if ( $oLic->customer_id !== $this->getEddCustomer()->id ) {
+			if ( !empty( $oC ) && $oLic->customer_id !== $oC->id ) {
 				continue;
 			}
 			if ( $oLic->get_download()->get_ID() !== $this->getEddDownload()->get_ID() ) {
@@ -44,19 +46,38 @@ class LocateViableLicense {
 			}
 		}
 
-		if ( empty( $aActive ) && !empty( $aExpired ) ) {
-			$oNewLicHome = ( new FindLicenseWithAvailableSlot() )
-				->setEddDownload( $this->getEddDownload() )
-				->setEddCustomer( $this->getEddCustomer() )
-				->find();
-			if ( $oNewLicHome instanceof \EDD_SL_License && $oNewLicHome->add_site( $sUrl ) ) {
-				$oNewLicHome->status = 'active';
-				foreach ( $aExpired as $oExpiredLic ) {
-					$oExpiredLic->remove_site( $sUrl );
-				}
+		$bRunLicenseClean = false;
+		if ( !empty( $aActive ) ) {
+			$oLicHome = array_pop( $aActive );
+			if ( empty( $oC ) ) {
+				$oC = new \EDD_Customer( $oLicHome->customer_id );
+			}
+			$bRunLicenseClean = $oC instanceof \EDD_Customer && !empty( $aActive ); // multiple active for site.
+		}
+		elseif ( empty( $aActive ) && !empty( $aExpired ) ) {
+			/** @var \EDD_SL_License $oExpiredLic */
+			$oExpiredLic = reset( $aExpired );
+			if ( empty( $oC ) ) {
+				$oC = new \EDD_Customer( $oExpiredLic->customer_id );
+			}
+			if ( $oC instanceof \EDD_Customer && $oC->id > 0 ) {
+				$oLicHome = ( new TransferActivationFromExpiredToActive() )
+					->setEddCustomer( $oC )
+					->setEddDownload( $this->getEddDownload() )
+					->transfer( $oExpiredLic, $sUrl );
+				$bRunLicenseClean = true;
 			}
 		}
 
-		return $oNewLicHome;
+		if ( $bRunLicenseClean && $oLicHome instanceof \EDD_SL_License ) {
+			if ( $oC instanceof \EDD_Customer ) {
+				( new CleanDuplicatedSiteActivations() )
+					->setEddCustomer( $oC )
+					->setEddDownload( $this->getEddDownload() )
+					->clean();
+			}
+		}
+
+		return $oLicHome;
 	}
 }

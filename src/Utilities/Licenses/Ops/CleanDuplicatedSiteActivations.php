@@ -17,6 +17,7 @@ class CleanDuplicatedSiteActivations {
 	use Consumers\EddCustomerConsumer;
 
 	public function clean() {
+		$oEDDSL = edd_software_licensing();
 
 		// For each URL, iterate over the activations to determine what state we're in
 		// i.e. how many activations do we have for the same URL for active licenses, and expired licenses.
@@ -33,28 +34,33 @@ class CleanDuplicatedSiteActivations {
 			if ( count( $aActiveActs ) > 0 ) {
 
 				// Since there is an active license with this URL, we remove the URL from all expired licenses.
-				if ( count( $aExpiredActs ) > 0 ) {
+				if ( !empty( $aExpiredActs ) ) {
 					foreach ( $aExpiredActs as $oExpiredAct ) {
-						( new \EDD_SL_License( $oExpiredAct->license_id ) )->remove_site( $sURL );
+						$oLic = $oEDDSL->get_license( $oExpiredAct->license_id );
+						if ( $oLic instanceof \EDD_SL_License ) {
+							error_log( sprintf( 'Unnecessary expired- remove %s from %s', $sURL, $oExpiredAct->license_id ) );
+							$oLic->remove_site( $sURL );
+						}
 					}
 				}
 
 				/**
-				 * There are multiple license with the same URL activated for it.
+				 * There are multiple licenses with the same URL activated for it.
 				 * We keep the one that will expire last and remove all the rest.
 				 */
 				if ( count( $aActiveActs ) > 1 ) {
 					// leave only the most recent active
-					$oActivation = array_pop( $aActiveActs );
-					$oCurrent = new \EDD_SL_License( $oActivation->license_id );
+					$oCurrent = $oEDDSL->get_license( array_pop( $aActiveActs )->license_id );
 					foreach ( $aActiveActs as $oActiveAct ) {
-						$oLic = new \EDD_SL_License( $oActiveAct->license_id );
-						if ( $oLic->expiration > 0 ) {
+						$oLic = $oEDDSL->get_license( $oActiveAct->license_id );
+						if ( $oLic instanceof \EDD_SL_License && $oLic->expiration > 0 ) {
 							if ( $oLic->expiration > $oCurrent->expiration ) {
+								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $sURL, $oCurrent->ID ) );
 								$oCurrent->remove_site( $sURL );
 								$oCurrent = $oLic;
 							}
 							else {
+								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $sURL, $oLic->ID ) );
 								$oLic->remove_site( $sURL );
 							}
 						}
