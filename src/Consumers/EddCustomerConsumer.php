@@ -13,18 +13,11 @@ trait EddCustomerConsumer {
 	 */
 	private $oEddCustomer;
 
-	/**
-	 * @return \EDD_Customer
-	 */
-	public function getEddCustomer() {
+	public function getEddCustomer() :?\EDD_Customer {
 		return $this->oEddCustomer;
 	}
 
-	/**
-	 * @param \EDD_Customer $oEddCustomer
-	 * @return $this
-	 */
-	public function setEddCustomer( $oEddCustomer ) {
+	public function setEddCustomer( \EDD_Customer $oEddCustomer ) :self {
 		$this->oEddCustomer = $oEddCustomer;
 		return $this;
 	}
