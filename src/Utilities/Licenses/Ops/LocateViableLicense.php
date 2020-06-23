@@ -38,7 +38,7 @@ class LocateViableLicense {
 				continue;
 			}
 
-			if ( $oLic->is_expired() ) {
+			if ( $oLic->status === 'disabled' || $oLic->is_expired() ) {
 				$aExpired[] = $oLic;
 			}
 			else {
