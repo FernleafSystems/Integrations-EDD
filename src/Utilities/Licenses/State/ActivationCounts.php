@@ -17,7 +17,10 @@ class ActivationCounts extends BaseState {
 
 		foreach ( $this->getLicIterator() as $oLicense ) {
 
-			if ( $oLicense->is_expired() ) {
+			if ( $oLicense->status === 'disabled' ) {
+				continue;
+			}
+			elseif ( $oLicense->is_expired() ) {
 
 				$this->assigned_expired += $oLicense->activation_count;
 				$this->limit_expired += $oLicense->license_limit();
