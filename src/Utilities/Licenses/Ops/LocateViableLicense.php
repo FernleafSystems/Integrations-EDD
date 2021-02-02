@@ -19,38 +19,38 @@ class LocateViableLicense {
 	 *
 	 * Will attempt to locate a URL attached to an expired license and then try to
 	 * add this site to an available active license.
-	 * @param string $sUrl
+	 * @param string $url
 	 * @return \EDD_SL_License|null
 	 */
-	public function locate( $sUrl ) :?\EDD_SL_License {
-		$oLicHome = null;
+	public function locate( string $url ) :?\EDD_SL_License {
+		$licHome = null;
 
 		$oC = $this->getEddCustomer();
 
 		$aActive = [];
 		$aExpired = [];
-		foreach ( ( new Retrieve() )->forUrl( $sUrl ) as $oAct ) {
-			$oLic = new \EDD_SL_License( $oAct->license_id );
-			if ( !empty( $oC ) && $oLic->customer_id !== $oC->id ) {
+		foreach ( ( new Retrieve() )->forUrl( $url ) as $oAct ) {
+			$lic = new \EDD_SL_License( $oAct->license_id );
+			if ( !empty( $oC ) && $lic->customer_id !== $oC->id ) {
 				continue;
 			}
-			if ( $oLic->get_download()->get_ID() !== $this->getEddDownload()->get_ID() ) {
+			if ( $lic->get_download()->get_ID() !== $this->getEddDownload()->get_ID() ) {
 				continue;
 			}
 
-			if ( $oLic->status === 'disabled' || $oLic->is_expired() ) {
-				$aExpired[] = $oLic;
+			if ( $lic->status === 'disabled' || $lic->is_expired() ) {
+				$aExpired[] = $lic;
 			}
 			else {
-				$aActive[] = $oLic;
+				$aActive[] = $lic;
 			}
 		}
 
 		$bRunLicenseClean = false;
 		if ( !empty( $aActive ) ) {
-			$oLicHome = array_pop( $aActive );
+			$licHome = array_pop( $aActive );
 			if ( empty( $oC ) ) {
-				$oC = new \EDD_Customer( $oLicHome->customer_id );
+				$oC = new \EDD_Customer( $licHome->customer_id );
 			}
 			$bRunLicenseClean = $oC instanceof \EDD_Customer && !empty( $aActive ); // multiple active for site.
 		}
@@ -61,15 +61,15 @@ class LocateViableLicense {
 				$oC = new \EDD_Customer( $oExpiredLic->customer_id );
 			}
 			if ( $oC instanceof \EDD_Customer && $oC->id > 0 ) {
-				$oLicHome = ( new TransferActivationFromExpiredToActive() )
+				$licHome = ( new TransferActivationFromExpiredToActive() )
 					->setEddCustomer( $oC )
 					->setEddDownload( $this->getEddDownload() )
-					->transfer( $oExpiredLic, $sUrl );
+					->transfer( $oExpiredLic, $url );
 				$bRunLicenseClean = true;
 			}
 		}
 
-		if ( $bRunLicenseClean && $oLicHome instanceof \EDD_SL_License ) {
+		if ( $bRunLicenseClean && $licHome instanceof \EDD_SL_License ) {
 			if ( $oC instanceof \EDD_Customer ) {
 				( new CleanDuplicatedSiteActivations() )
 					->setEddCustomer( $oC )
@@ -78,6 +78,6 @@ class LocateViableLicense {
 			}
 		}
 
-		return $oLicHome;
+		return $licHome;
 	}
 }

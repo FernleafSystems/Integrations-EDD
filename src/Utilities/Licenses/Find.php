@@ -13,11 +13,11 @@ class Find extends Retrieve {
 	 */
 	public function withActivationSlot() {
 		$oTheLicense = null;
-		foreach ( $this->retrieve() as $oLicense ) {
-			if ( !$oLicense->is_expired() ) {
-				$nLimit = $oLicense->activation_limit; // 0 == unlimited
-				if ( $nLimit <= 0 || $nLimit > $oLicense->activation_count ) {
-					$oTheLicense = $oLicense;
+		foreach ( $this->retrieve() as $lic ) {
+			if ( !$lic->is_expired() ) {
+				$nLimit = $lic->activation_limit; // 0 == unlimited
+				if ( $nLimit <= 0 || $nLimit > $lic->activation_count ) {
+					$oTheLicense = $lic;
 					break;
 				}
 			}
@@ -26,34 +26,24 @@ class Find extends Retrieve {
 	}
 
 	/**
-	 * @param string $sUrl
-	 * @param bool   $bIncludeExpired
+	 * @param string $url
+	 * @param bool   $includeExpired
 	 * @return \EDD_SL_License|null
 	 */
-	public function withActiveSite( $sUrl, $bIncludeExpired = false ) {
-		$oTheLicense = null;
+	public function withActiveSite( $url, $includeExpired = false ) {
+		$theLicense = null;
 
-		$aLicensesBySite = $this->retrieve( [ 'site_name' => $sUrl ] );
+		$aLicensesBySite = $this->retrieve( [ 'site_name' => $url ] );
 		if ( !empty( $aLicensesBySite ) ) {
-			foreach ( $aLicensesBySite as $oLic ) {
-				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
-					$oTheLicense = $oLic;
+			foreach ( $aLicensesBySite as $lic ) {
+				if ( ( $includeExpired || !$lic->is_expired() ) && in_array( $url, $lic->sites ) ) {
+					$theLicense = $lic;
 					break;
 				}
 			}
 		}
 
-//		// Do we need this at all? Also doesn't page results
-//		if ( empty( $oTheLicense ) ) {
-//			foreach ( $this->retrieve() as $oLic ) {
-//				if ( ( $bIncludeExpired || !$oLic->is_expired() ) && in_array( $sUrl, $oLic->sites ) ) {
-//					$oTheLicense = $oLic;
-//					break;
-//				}
-//			}
-//		}
-
-		return $oTheLicense;
+		return $theLicense;
 	}
 
 	/**

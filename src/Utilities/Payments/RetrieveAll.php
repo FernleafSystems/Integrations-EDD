@@ -9,31 +9,31 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Payments;
 class RetrieveAll {
 
 	/**
-	 * @param array $aQueryOptions
+	 * @param array $queryParams
 	 * @return \EDD_Payment[]
 	 */
-	public function retrieve( $aQueryOptions = [] ) {
-		$aAll = [];
+	public function retrieve( $queryParams = [] ) {
+		$all = [];
 
-		$aQueryOptions = array_merge(
+		$queryParams = array_merge(
 			[
 				'orderby' => 'ID',
 				'order'   => 'ASC',
 				'page'    => 1,
 			],
-			$aQueryOptions
+			$queryParams
 		);
 
 		do {
-			$nCountBefore = count( $aAll );
-			$aAll = array_merge(
-				$aAll,
-				( new \EDD_Payments_Query( $aQueryOptions ) )->get_payments()
+			$nCountBefore = count( $all );
+			$all = array_merge(
+				$all,
+				( new \EDD_Payments_Query( $queryParams ) )->get_payments()
 			);
 
-			$aQueryOptions[ 'page' ]++;
-		} while ( $nCountBefore != count( $aAll ) );
+			$queryParams[ 'page' ]++;
+		} while ( $nCountBefore != count( $all ) );
 
-		return $aAll;
+		return $all;
 	}
 }

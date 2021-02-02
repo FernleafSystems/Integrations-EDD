@@ -22,28 +22,28 @@ class PaymentIterator extends CommonEntityIterator {
 	}
 
 	/**
-	 * @param int $nCustomerId
+	 * @param int $customerID
 	 * @return $this
 	 */
-	public function filterByCustomer( $nCustomerId ) {
-		return $this->setCustomQueryFilter( 'customer', $nCustomerId );
+	public function filterByCustomer( $customerID ) {
+		return $this->setCustomQueryFilter( 'customer', $customerID );
 	}
 
 	/**
-	 * @param string|array $sStatus
+	 * @param string|array $status
 	 * @return $this
 	 */
-	public function filterByStatus( $sStatus ) {
-		return $this->setCustomQueryFilter( 'status', $sStatus );
+	public function filterByStatus( $status ) {
+		return $this->setCustomQueryFilter( 'status', $status );
 	}
 
 	/**
 	 * @return array
 	 */
 	protected function getDefaultQueryFilters() {
-		$aDefs = parent::getDefaultQueryFilters();
-		$aDefs[ 'status' ] = 'all';
-		return $aDefs;
+		$defs = parent::getDefaultQueryFilters();
+		$defs[ 'status' ] = 'all';
+		return $defs;
 	}
 
 	/**

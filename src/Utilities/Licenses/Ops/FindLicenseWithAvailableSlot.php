@@ -15,25 +15,25 @@ class FindLicenseWithAvailableSlot extends BaseLicenses {
 	 */
 	public function find() :?\EDD_SL_License {
 
-		$aPossible = [];
-		foreach ( $this->getLicIterator() as $oLic ) {
-			if ( !$oLic->is_expired() &&
-				 $oLic->get_download()->get_ID() == $this->getEddDownload()->get_ID() &&
-				 $oLic->activation_count < $oLic->activation_limit ) {
-				$aPossible[] = $oLic;
+		$possible = [];
+		foreach ( $this->getLicIterator() as $lic ) {
+			if ( !$lic->is_expired() &&
+				 $lic->get_download()->get_ID() == $this->getEddDownload()->get_ID() &&
+				 $lic->activation_count < $lic->activation_limit ) {
+				$possible[] = $lic;
 			}
 		}
 
-		$oTheLic = null;
-		if ( !empty( $aPossible ) ) {
-			$oTheLic = array_pop( $aPossible );
-			foreach ( $aPossible as $oMaybeLic ) {
-				if ( $oMaybeLic->expiration > $oTheLic->expiration ) {
-					$oTheLic = $oMaybeLic;
+		$theLicense = null;
+		if ( !empty( $possible ) ) {
+			$theLicense = array_pop( $possible );
+			foreach ( $possible as $maybeLic ) {
+				if ( $maybeLic->expiration > $theLicense->expiration ) {
+					$theLicense = $maybeLic;
 				}
 			}
 		}
 
-		return $oTheLic;
+		return $theLicense;
 	}
 }
