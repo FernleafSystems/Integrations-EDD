@@ -23,7 +23,7 @@ class TransferActivationFromExpiredToActive {
 	public function transfer( \EDD_SL_License $oldLicense, string $url ) :?\EDD_SL_License {
 		$newLicense = null;
 
-		if ( !$oldLicense->is_expired() && $oldLicense->status !== 'disabled ' ) {
+		if ( !$oldLicense->is_expired() && $oldLicense->status !== 'disabled' ) {
 			throw new \LogicException( 'Attempting to transfer license from a non-expired license' );
 		}
 
