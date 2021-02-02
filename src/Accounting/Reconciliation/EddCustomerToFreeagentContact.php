@@ -80,20 +80,20 @@ class EddCustomerToFreeagentContact {
 	 * @return $this
 	 */
 	protected function updateContactUsingPaymentInfo() {
-		$oPayment = $this->getPayment();
+		$pymt = $this->getPayment();
 
 		// Freeagent uses full country names; EDD uses ISO2 codes
-		$sPaymentCountry = $this->getCountryNameFromIso2Code( $oPayment->address[ 'country' ] );
-		$aUserInfo = edd_get_payment_meta_user_info( $oPayment->ID );
+		$sPaymentCountry = $this->getCountryNameFromIso2Code( $pymt->address[ 'country' ] );
+		$aUserInfo = edd_get_payment_meta_user_info( $pymt->ID );
 
 		$oOriginalContact = $this->getContact();
 
 		$oContact = ( new Entities\Contacts\Update() )
-			->setFirstName( $oOriginalContact->getFirstName() )
-			->setLastName( $oOriginalContact->getLastName() )
+			->setFirstName( $oOriginalContact->first_name )
+			->setLastName( $oOriginalContact->last_name )
 			->setConnection( $this->getConnection() )
 			->setEntityId( $this->getContact()->getId() )
-			->setEmail( $oPayment->email )
+			->setEmail( $pymt->email )
 			->setAddress_Line( $aUserInfo[ 'line1' ], 1 )
 			->setAddress_Line( $aUserInfo[ 'line2' ], 2 )
 			->setAddress_Town( $aUserInfo[ 'city' ] )
@@ -109,13 +109,13 @@ class EddCustomerToFreeagentContact {
 	}
 
 	/**
-	 * @param string $sCode
+	 * @param string $code
 	 * @return string
 	 */
-	protected function getCountryNameFromIso2Code( $sCode ) {
+	protected function getCountryNameFromIso2Code( $code ) {
 		$aCountries = edd_get_country_list();
 		$aCountries[ 'HR' ] = 'Croatia'; // bug when country name is Croatia/Hrvatska and FreeAgent doesn't understand
-		return isset( $aCountries[ $sCode ] ) ? $aCountries[ $sCode ] : $sCode;
+		return isset( $aCountries[ $code ] ) ? $aCountries[ $code ] : $code;
 	}
 
 	/**

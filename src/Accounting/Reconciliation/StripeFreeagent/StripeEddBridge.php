@@ -13,19 +13,19 @@ class StripeEddBridge extends StripeBridge {
 	use CommonEddBridge;
 
 	/**
-	 * @param string $sTxnID a stripe txn ID
+	 * @param string $txnID a stripe txn ID
 	 * @return DataWrapper\ChargeVO
 	 * @throws \Exception
 	 */
-	public function buildChargeFromTransaction( $sTxnID ) {
-		$oCharge = parent::buildChargeFromTransaction( $sTxnID );
+	public function buildChargeFromTransaction( $txnID ) {
+		$oCharge = parent::buildChargeFromTransaction( $txnID );
 
-		$oItem = $this->getCartItemDetailsFromGatewayTxn( $sTxnID );
+		$oItem = $this->getCartItemDetailsFromGatewayTxn( $txnID );
 
-		$sPeriod = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID )->period;
+		$sPeriod = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID )->period;
 		if ( empty( $sPeriod ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
-			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $sTxnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
 			$sPeriod = 'year';
 		}
 		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years

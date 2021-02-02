@@ -15,19 +15,19 @@ class PaypalEddBridge extends PaypalBridge {
 	const PAYMENTMETA_EXT_BILL_ID = 'icwpeddpaypalbridge_ext_bill_id';
 
 	/**
-	 * @param string $sTxnID a stripe txn ID
+	 * @param string $txnID a stripe txn ID
 	 * @return DataWrapper\ChargeVO
 	 * @throws \Exception
 	 */
-	public function buildChargeFromTransaction( $sTxnID ) {
-		$oCharge = parent::buildChargeFromTransaction( $sTxnID );
+	public function buildChargeFromTransaction( $txnID ) {
+		$charge = parent::buildChargeFromTransaction( $txnID );
 
-		$oItem = $this->getCartItemDetailsFromGatewayTxn( $sTxnID );
+		$cartItem = $this->getCartItemDetailsFromGatewayTxn( $txnID );
 
-		$oSub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTxnID );
+		$oSub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID );
 		if ( empty( $oSub->period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
-			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $sTxnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
 			$sPeriod = 'year';
 		}
 		else {
@@ -37,26 +37,26 @@ class PaypalEddBridge extends PaypalBridge {
 		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $oItem->price != $oCharge->getAmount_Gross() ) {
+		if ( $cartItem->price != $charge->getAmount_Gross() ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		return $oCharge->setItemName( $oItem->name )
+		return $charge->setItemName( $cartItem->name )
 					   ->setItemPeriodType( $sPeriod )
-					   ->setItemQuantity( $oItem->quantity )
-					   ->setItemSubtotal( $oItem->subtotal )
-					   ->setItemTaxRate( $oItem->getTaxRate() )
-					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
-					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
+					   ->setItemQuantity( $cartItem->quantity )
+					   ->setItemSubtotal( $cartItem->subtotal )
+					   ->setItemTaxRate( $cartItem->getTaxRate() )
+					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $charge ) )
+					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $charge )->ID );
 	}
 
 	/**
-	 * @param DataWrapper\PayoutVO $oPayout
+	 * @param DataWrapper\PayoutVO $payout
 	 * @return int|null
 	 */
-	public function getExternalBankTxnId( $oPayout ) {
+	public function getExternalBankTxnId( $payout ) {
 		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->id )
+			->retrieve( $payout->id )
 			->get_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID );
 	}
 

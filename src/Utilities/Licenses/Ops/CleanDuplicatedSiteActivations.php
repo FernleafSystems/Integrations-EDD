@@ -21,25 +21,25 @@ class CleanDuplicatedSiteActivations {
 
 		// For each URL, iterate over the activations to determine what state we're in
 		// i.e. how many activations do we have for the same URL for active licenses, and expired licenses.
-		foreach ( $this->getActivationsSortedBySite() as $sURL => $aActs ) {
+		foreach ( $this->getActivationsSortedBySite() as $url => $activations ) {
 
-			/** @var EddActivationVO[] $aActiveActs */
-			$aActiveActs = [];
-			/** @var EddActivationVO[] $aExpiredActs */
-			$aExpiredActs = [];
-			foreach ( $aActs as $oAct ) {
-				$oAct->lic_expired ? ( $aExpiredActs[] = $oAct ) : ( $aActiveActs[] = $oAct );
+			/** @var EddActivationVO[] $activeActs */
+			$activeActs = [];
+			/** @var EddActivationVO[] $expiredActs */
+			$expiredActs = [];
+			foreach ( $activations as $activ ) {
+				$activ->lic_expired ? ( $expiredActs[] = $activ ) : ( $activeActs[] = $activ );
 			}
 
-			if ( count( $aActiveActs ) > 0 ) {
+			if ( count( $activeActs ) > 0 ) {
 
 				// Since there is an active license with this URL, we remove the URL from all expired licenses.
-				if ( !empty( $aExpiredActs ) ) {
-					foreach ( $aExpiredActs as $oExpiredAct ) {
-						$oLic = $oEDDSL->get_license( $oExpiredAct->license_id );
-						if ( $oLic instanceof \EDD_SL_License ) {
-							error_log( sprintf( 'Unnecessary expired- remove %s from %s', $sURL, $oExpiredAct->license_id ) );
-							$oLic->remove_site( $sURL );
+				if ( !empty( $expiredActs ) ) {
+					foreach ( $expiredActs as $oExpiredAct ) {
+						$lic = $oEDDSL->get_license( $oExpiredAct->license_id );
+						if ( $lic instanceof \EDD_SL_License ) {
+							error_log( sprintf( 'Unnecessary expired- remove %s from %s', $url, $oExpiredAct->license_id ) );
+							$lic->remove_site( $url );
 						}
 					}
 				}
@@ -48,20 +48,20 @@ class CleanDuplicatedSiteActivations {
 				 * There are multiple licenses with the same URL activated for it.
 				 * We keep the one that will expire last and remove all the rest.
 				 */
-				if ( count( $aActiveActs ) > 1 ) {
+				if ( count( $activeActs ) > 1 ) {
 					// leave only the most recent active
-					$oCurrent = $oEDDSL->get_license( array_pop( $aActiveActs )->license_id );
-					foreach ( $aActiveActs as $oActiveAct ) {
-						$oLic = $oEDDSL->get_license( $oActiveAct->license_id );
-						if ( $oLic instanceof \EDD_SL_License && $oLic->expiration > 0 ) {
-							if ( $oLic->expiration > $oCurrent->expiration ) {
-								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $sURL, $oCurrent->ID ) );
-								$oCurrent->remove_site( $sURL );
-								$oCurrent = $oLic;
+					$oCurrent = $oEDDSL->get_license( array_pop( $activeActs )->license_id );
+					foreach ( $activeActs as $oActiveAct ) {
+						$lic = $oEDDSL->get_license( $oActiveAct->license_id );
+						if ( $lic instanceof \EDD_SL_License && $lic->expiration > 0 ) {
+							if ( $lic->expiration > $oCurrent->expiration ) {
+								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $url, $oCurrent->ID ) );
+								$oCurrent->remove_site( $url );
+								$oCurrent = $lic;
 							}
 							else {
-								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $sURL, $oLic->ID ) );
-								$oLic->remove_site( $sURL );
+								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $url, $lic->ID ) );
+								$lic->remove_site( $url );
 							}
 						}
 					}
@@ -75,23 +75,23 @@ class CleanDuplicatedSiteActivations {
 	 */
 	private function getActivationsSortedBySite() {
 
-		$oLicIT = new LicensesIterator();
-		$oLicIT->filterByCustomer( $this->getEddCustomer()->id );
+		$licIT = new LicensesIterator();
+		$licIT->filterByCustomer( $this->getEddCustomer()->id );
 
-		/** @var EddActivationVO[][] $aActsByUrl */
-		$aActsByUrl = [];
-		foreach ( $oLicIT as $oLic ) {
+		/** @var EddActivationVO[][] $activByURL */
+		$activByURL = [];
+		foreach ( $licIT as $oLic ) {
 			foreach ( ( new Retrieve() )->forLicense( $oLic ) as $oAct ) {
-				if ( !isset( $aActsByUrl[ $oAct->site_name ] ) ) {
-					$aActsByUrl[ $oAct->site_name ] = [];
+				if ( !isset( $activByURL[ $oAct->site_name ] ) ) {
+					$activByURL[ $oAct->site_name ] = [];
 				}
-				$aActsByUrl[ $oAct->site_name ][] = $oAct;
+				$activByURL[ $oAct->site_name ][] = $oAct;
 			}
 		}
 
 		// Keep only the URLs where their activation count is greater 1
 		return array_filter(
-			$aActsByUrl,
+			$activByURL,
 			fn( $aActs ) => count( $aActs ) > 1
 		);
 	}

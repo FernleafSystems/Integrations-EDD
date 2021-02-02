@@ -20,11 +20,11 @@ class SubscriptionsIterator extends CommonEntityIterator {
 	}
 
 	/**
-	 * @param int|array $nCustomerId
+	 * @param int|array $customerID
 	 * @return $this
 	 */
-	public function filterByCustomer( $nCustomerId ) {
-		return $this->setCustomQueryFilter( 'customer_id', $nCustomerId );
+	public function filterByCustomer( $customerID ) {
+		return $this->setCustomQueryFilter( 'customer_id', $customerID );
 	}
 
 	/**
