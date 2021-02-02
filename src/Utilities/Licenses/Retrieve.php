@@ -11,8 +11,8 @@ use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
  */
 class Retrieve {
 
-	use EddCustomerConsumer,
-		EddDownloadConsumer;
+	use EddCustomerConsumer;
+	use EddDownloadConsumer;
 
 	/**
 	 * @var array
