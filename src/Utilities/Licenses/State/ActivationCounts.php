@@ -15,23 +15,23 @@ class ActivationCounts extends BaseState {
 
 	protected function run() {
 
-		foreach ( $this->getLicIterator() as $oLicense ) {
+		foreach ( $this->getLicIterator() as $lic ) {
 
-			if ( $oLicense->status === 'disabled' ) {
+			if ( empty( $lic ) || $lic->status === 'disabled' ) {
 				continue;
 			}
-			elseif ( $oLicense->is_expired() ) {
+			elseif ( $lic->is_expired() ) {
 
-				$this->assigned_expired += $oLicense->activation_count;
-				$this->limit_expired += $oLicense->license_limit();
+				$this->assigned_expired += $lic->activation_count;
+				$this->limit_expired += $lic->license_limit();
 			}
 			else {
-				$this->assigned += $oLicense->activation_count;
-				if ( $oLicense->activation_limit <= 0 ) {
+				$this->assigned += $lic->activation_count;
+				if ( $lic->activation_limit <= 0 ) {
 					$this->unlimited = true;
 				}
 				else {
-					$this->limit += $oLicense->license_limit();
+					$this->limit += $lic->license_limit();
 				}
 			}
 		}
