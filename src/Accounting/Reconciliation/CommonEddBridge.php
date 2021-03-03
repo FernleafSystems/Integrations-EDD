@@ -136,6 +136,13 @@ trait CommonEddBridge {
 		) );
 	}
 
+	protected function getCartItemName( CartItemVo $item ) {
+		if ( !empty( $item->item_number[ 'options' ][ 'price_id' ] ) ) {
+			$name = edd_get_price_option_name( $item->id, $item->item_number[ 'options' ][ 'price_id' ] );
+		}
+		return empty( $name ) ? $item->name : $name;
+	}
+
 	/**
 	 * @param string $sGatewayTxnId
 	 * @return CartItemVo

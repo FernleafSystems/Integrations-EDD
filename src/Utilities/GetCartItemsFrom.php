@@ -11,63 +11,63 @@ use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 class GetCartItemsFrom {
 
 	/**
-	 * @param int $nPaymentId
+	 * @param int $paymentId
 	 * @return CartItemVo[]
 	 */
-	public function paymentId( $nPaymentId ) {
-		return $this->convertToCartItemVo( $nPaymentId );
+	public function paymentId( $paymentId ) {
+		return $this->convertToCartItemVo( $paymentId );
 	}
 
 	/**
-	 * @param string $sGatewayTxnId
+	 * @param string $gatewayTxnId
 	 * @return CartItemVo[]
 	 */
-	public function transactionId( $sGatewayTxnId ) {
-		$aCartItems = [];
+	public function transactionId( $gatewayTxnId ) {
+		$items = [];
 
-		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sGatewayTxnId );
+		$nPaymentId = edd_get_purchase_id_by_transaction_id( $gatewayTxnId );
 		if ( empty( $nPaymentId ) ) {
-			$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sGatewayTxnId );
-			$oItem = $this->subscription( $oSub );
-			if ( !empty( $oItem ) ) {
-				$aCartItems[] = $oItem;
+			$sub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayTxnId );
+			$item = $this->subscription( $sub );
+			if ( !empty( $item ) ) {
+				$items[] = $item;
 			}
 		}
 		else { // must be the first purchase of a subscription.
-			$aCartItems = $this->paymentId( $nPaymentId );
+			$items = $this->paymentId( $nPaymentId );
 		}
-		return $aCartItems;
+		return $items;
 	}
 
 	/**
-	 * @param \EDD_Subscription $oSub
+	 * @param \EDD_Subscription $sub
 	 * @return CartItemVo|null
 	 */
-	public function subscription( $oSub ) {
+	public function subscription( $sub ) {
 		$oItem = null;
 
-		$aItems = $this->convertToCartItemVo( $oSub->get_original_payment_id(), $oSub->product_id );
+		$aItems = $this->convertToCartItemVo( $sub->get_original_payment_id(), $sub->product_id );
 		if ( !empty( $aItems ) ) {
-			$oItem = array_pop( $aItems )->setParentSubscriptionId( $oSub->id );
+			$oItem = array_pop( $aItems )->setParentSubscriptionId( $sub->id );
 		}
 		return $oItem;
 	}
 
 	/**
-	 * @param int      $nPaymentId
+	 * @param int      $paymentID
 	 * @param int|null $nProductId - filter cart items for a given product ID
 	 * @return CartItemVo[]
 	 */
-	protected function convertToCartItemVo( $nPaymentId, $nProductId = null ) {
-		$aItems = [];
+	protected function convertToCartItemVo( $paymentID, $nProductId = null ) :array {
+		$items = [];
 
-		foreach ( ( new \EDD_Payment( $nPaymentId ) )->cart_details as $aCartItem ) {
-			if ( empty( $nProductId ) || $aCartItem[ 'id' ] == $nProductId ) {
-				$aItems[] = ( new CartItemVo() )
-					->applyFromArray( $aCartItem )
-					->setParentPaymentId( $nPaymentId );
+		foreach ( edd_get_payment( $paymentID )->cart_details as $item ) {
+			if ( empty( $nProductId ) || $item[ 'id' ] == $nProductId ) {
+				$vo = ( new CartItemVo() )->applyFromArray( $item );
+				$vo->parent_payment_id = $paymentID;
+				$items[] = $vo;
 			}
 		}
-		return $aItems;
+		return $items;
 	}
 }
