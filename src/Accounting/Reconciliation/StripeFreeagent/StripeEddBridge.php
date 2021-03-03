@@ -18,30 +18,30 @@ class StripeEddBridge extends StripeBridge {
 	 * @throws \Exception
 	 */
 	public function buildChargeFromTransaction( $txnID ) {
-		$oCharge = parent::buildChargeFromTransaction( $txnID );
+		$charge = parent::buildChargeFromTransaction( $txnID );
 
-		$oItem = $this->getCartItemDetailsFromGatewayTxn( $txnID );
+		$item = $this->getCartItemDetailsFromGatewayTxn( $txnID );
 
-		$sPeriod = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID )->period;
-		if ( empty( $sPeriod ) ) {
+		$period = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID )->period;
+		if ( empty( $period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
 			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
-			$sPeriod = 'year';
+			$period = 'year';
 		}
-		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
+		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $oItem->price != $oCharge->getAmount_Gross() ) {
+		if ( $item->price != $charge->getAmount_Gross() ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		return $oCharge->setItemName( $oItem->name )
-					   ->setItemPeriodType( $sPeriod )
-					   ->setItemQuantity( $oItem->quantity )
-					   ->setItemSubtotal( $oItem->subtotal )
-					   ->setItemTaxRate( $oItem->getTaxRate() )
-					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $oCharge ) )
-					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $oCharge )->ID );
+		return $charge->setItemName( $this->getCartItemName( $item ) )
+					  ->setItemPeriodType( $period )
+					  ->setItemQuantity( $item->quantity )
+					  ->setItemSubtotal( $item->getPreTaxPerItemSubtotal() )
+					  ->setItemTaxRate( $item->getTaxRate() )
+					  ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $charge ) )
+					  ->setLocalPaymentId( $this->getEddPaymentFromCharge( $charge )->ID );
 	}
 
 	/**

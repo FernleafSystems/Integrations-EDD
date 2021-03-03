@@ -2,34 +2,38 @@
 
 namespace FernleafSystems\Integrations\Edd\Entities;
 
-use FernleafSystems\Utilities\Data\Adapter\StdClassAdapter;
+use FernleafSystems\Utilities\Data\Adapter\DynPropertiesClass;
 
 /**
  * Class CartItemVo
  * @package FernleafSystems\WordPress\Integrations\Edd\Utilities\Entities
  * @property int    $id                   - download ID
  * @property float  $discount
+ * @property array  $item_number          - cart item specifics
  * @property float  $item_price
  * @property string $name
- * @property float  $price
+ * @property string $name_price_id
+ * @property float  $price                - the "price you pay" at checkout
  * @property float  $price_order_currency - price in the order currency
  * @property int    $quantity
- * @property float  $subtotal
+ * @property float  $subtotal             - UNUSABLE as it doesn't factor in discounts getPreTaxTotal()
  * @property float  $tax
  * @property int    $parent_payment_id
  * @property int    $parent_subscription_id
  */
-class CartItemVo {
+class CartItemVo extends DynPropertiesClass {
 
-	use StdClassAdapter;
+	public function getPreTaxPerItemSubtotal() :float {
+		return $this->item_price - ( $this->discount/$this->quantity );
+	}
 
 	/**
 	 * To get the Percentage out of 100, multiply by 100
 	 * @return float a decimal value.
 	 */
 	public function getTaxRate() {
-		$nTaxRate = ( $this->tax > 0 ) ? ( $this->tax/$this->subtotal ) : 0;
-		return ( $nTaxRate == 0 ) ? $nTaxRate : round( $nTaxRate, 3 );
+		$rate = $this->tax > 0 ? $this->tax/$this->price : 0;
+		return $rate == 0 ? $rate : round( $rate, 3 );
 	}
 
 	/**

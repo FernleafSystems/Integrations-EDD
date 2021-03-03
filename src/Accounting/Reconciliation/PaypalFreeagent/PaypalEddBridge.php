@@ -11,6 +11,7 @@ use FernleafSystems\Integrations\Freeagent\Service\PayPal\PaypalBridge;
 class PaypalEddBridge extends PaypalBridge {
 
 	use CommonEddBridge;
+
 	const PAYMENTMETA_EXT_BANK_TXN_ID = 'icwpeddpaypalbridge_ext_bank_tx_id';
 	const PAYMENTMETA_EXT_BILL_ID = 'icwpeddpaypalbridge_ext_bill_id';
 
@@ -22,32 +23,32 @@ class PaypalEddBridge extends PaypalBridge {
 	public function buildChargeFromTransaction( $txnID ) {
 		$charge = parent::buildChargeFromTransaction( $txnID );
 
-		$cartItem = $this->getCartItemDetailsFromGatewayTxn( $txnID );
+		$item = $this->getCartItemDetailsFromGatewayTxn( $txnID );
 
 		$oSub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID );
 		if ( empty( $oSub->period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
 			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
-			$sPeriod = 'year';
+			$period = 'year';
 		}
 		else {
-			$sPeriod = $oSub->period;
+			$period = $oSub->period;
 		}
 
-		$sPeriod = ucfirst( strtolower( $sPeriod.'s' ) ); // e.g. year -> Years
+		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $cartItem->price != $charge->getAmount_Gross() ) {
+		if ( $item->price != $charge->getAmount_Gross() ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		return $charge->setItemName( $cartItem->name )
-					   ->setItemPeriodType( $sPeriod )
-					   ->setItemQuantity( $cartItem->quantity )
-					   ->setItemSubtotal( $cartItem->subtotal )
-					   ->setItemTaxRate( $cartItem->getTaxRate() )
-					   ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $charge ) )
-					   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $charge )->ID );
+		return $charge->setItemName( $this->getCartItemName( $item ) )
+					  ->setItemPeriodType( $period )
+					  ->setItemQuantity( $item->quantity )
+					  ->setItemSubtotal( $item->getPreTaxPerItemSubtotal() )
+					  ->setItemTaxRate( $item->getTaxRate() )
+					  ->setIsEuVatMoss( $this->isPaymentEuVatMossRegion( $charge ) )
+					  ->setLocalPaymentId( $this->getEddPaymentFromCharge( $charge )->ID );
 	}
 
 	/**
