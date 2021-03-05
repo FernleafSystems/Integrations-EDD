@@ -140,7 +140,7 @@ trait CommonEddBridge {
 		if ( !empty( $item->item_number[ 'options' ][ 'price_id' ] ) ) {
 			$name = edd_get_price_option_name( $item->id, $item->item_number[ 'options' ][ 'price_id' ] );
 		}
-		return empty( $name ) ? $item->name : $name;
+		return empty( $name ) ? $item->name : $item->name.': '.$name;
 	}
 
 	/**
