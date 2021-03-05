@@ -24,7 +24,11 @@ use FernleafSystems\Utilities\Data\Adapter\DynPropertiesClass;
 class CartItemVo extends DynPropertiesClass {
 
 	public function getPreTaxPerItemSubtotal() :float {
-		return $this->item_price - ( $this->discount/$this->quantity );
+		return round( $this->getPreTaxSubtotal()/$this->quantity, 2 );
+	}
+
+	public function getPreTaxSubtotal() :float {
+		return $this->quantity*$this->item_price - $this->discount;
 	}
 
 	/**
@@ -32,7 +36,7 @@ class CartItemVo extends DynPropertiesClass {
 	 * @return float a decimal value.
 	 */
 	public function getTaxRate() {
-		$rate = $this->tax > 0 ? $this->tax/$this->price : 0;
+		$rate = $this->tax > 0 ? $this->tax/$this->getPreTaxSubtotal() : 0;
 		return $rate == 0 ? $rate : round( $rate, 3 );
 	}
 
