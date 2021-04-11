@@ -219,7 +219,7 @@ trait CommonEddBridge {
 		return !is_null( $this->getEddPaymentFromCharge( $oCharge ) );
 	}
 
-	protected function getChargeCountry( ChargeVO $charge ) :bool {
+	protected function getChargeCountry( ChargeVO $charge ) :string {
 		return $this->getEddPaymentFromCharge( $charge )->address[ 'country' ];
 	}
 
@@ -247,10 +247,8 @@ trait CommonEddBridge {
 	protected function setupChargeEcStatus( ChargeVO $charge ) {
 		if ( $this->isChargeInEcRegion( $charge ) ) {
 			$vatNumber = $this->getVatNumber( $charge );
-			if ( !empty( $vatNumber ) ) {
-				// TODO: Check country is the same as the VAT country code??
-				$charge->ec_status = empty( $vatNumber ) ? 'EC VAT MOSS' : 'EC Services';
-			}
+			// TODO: Check country is the same as the VAT country code??
+			$charge->ec_status = empty( $vatNumber ) ? 'EC VAT MOSS' : 'EC Services';
 		}
 		else {
 			$charge->ec_status = 'UK/Non-EC';
