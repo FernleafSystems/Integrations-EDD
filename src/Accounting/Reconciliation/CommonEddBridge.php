@@ -32,8 +32,8 @@ trait CommonEddBridge {
 	 * @return Entities\Contacts\ContactVO
 	 */
 	public function createFreeagentContact( $oCharge, $bUpdateOnly = false ) {
-		$oPayment = $this->getEddPaymentFromCharge( $oCharge );
-		return $this->createFreeagentContactFromPayment( $oPayment, $bUpdateOnly );
+		$payment = $this->getEddPaymentFromCharge( $oCharge );
+		return $this->createFreeagentContactFromPayment( $payment, $bUpdateOnly );
 	}
 
 	/**
@@ -49,8 +49,8 @@ trait CommonEddBridge {
 	 * @return int
 	 */
 	public function getFreeagentInvoiceId( $oCharge ) {
-		$aIds = $this->getFreeagentInvoiceIdsFromEddPayment( $this->getEddPaymentFromCharge( $oCharge ) );
-		return isset( $aIds[ $oCharge->id ] ) ? $aIds[ $oCharge->id ] : null;
+		$ids = $this->getFreeagentInvoiceIdsFromEddPayment( $this->getEddPaymentFromCharge( $oCharge ) );
+		return $ids[ $oCharge->id ] ?? null;
 	}
 
 	/**
@@ -67,72 +67,71 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param string $sChargeTxnId
+	 * @param string $chargeTxnID
 	 * @return Entities\Invoices\InvoiceVO
 	 * @throws \Exception
 	 */
-	public function createFreeagentInvoiceFromChargeId( $sChargeTxnId ) {
+	public function createFreeagentInvoiceFromChargeId( $chargeTxnID ) {
 		return $this->createFreeagentInvoiceFromEddPaymentCartItem(
-			$this->getCartItemDetailsFromGatewayTxn( $sChargeTxnId )
+			$this->getCartItemDetailsFromGatewayTxn( $chargeTxnID )
 		);
 	}
 
 	/**
 	 * First attempts to locate a previously created invoice for this Payment.
-	 * @param CartItemVo $oCartItem
+	 * @param CartItemVo $cartItem
 	 * @return Entities\Invoices\InvoiceVO|null
 	 * @throws \Exception
 	 */
-	public function createFreeagentInvoiceFromEddPaymentCartItem( $oCartItem ) {
-		$oInvoice = null;
+	public function createFreeagentInvoiceFromEddPaymentCartItem( $cartItem ) {
+		$inv = null;
 
-		$sTxnId = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $oCartItem );
-		$oCharge = $this->buildChargeFromTransaction( $sTxnId );
+		$txnID = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $cartItem );
+		$charge = $this->buildChargeFromTransaction( $txnID );
 
-		$nInvoiceId = $this->getFreeagentInvoiceId( $oCharge );
+		$nInvoiceId = $this->getFreeagentInvoiceId( $charge );
 
 		if ( !empty( $nInvoiceId ) ) {
-			$oInvoice = ( new Entities\Invoices\Retrieve() )
+			$inv = ( new Entities\Invoices\Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $nInvoiceId )
 				->retrieve();
 		}
-		if ( empty( $nInvoiceId ) || empty( $oInvoice ) ) {
-			$oInvoice = ( new CreateFromCharge() )
+		if ( empty( $nInvoiceId ) || empty( $inv ) ) {
+			$inv = ( new CreateFromCharge() )
 				->setBridge( $this )
 				->setConnection( $this->getConnection() )
 				->setFreeagentConfigVO( $this->getFreeagentConfigVO() )
-				->setChargeVO( $oCharge )
+				->setChargeVO( $charge )
 				->create();
 		}
 
-		if ( !empty( $oInvoice ) && $oInvoice->isStatusDraft() ) {
+		if ( !empty( $inv ) && $inv->isStatusDraft() ) {
 			sleep( 10 );
 			( new Entities\Invoices\MarkAs() )
 				->setConnection( $this->getConnection() )
-				->setEntityId( $oInvoice->getId() )
+				->setEntityId( $inv->getId() )
 				->sent();
-			$oInvoice = ( new Entities\Invoices\Retrieve() )
+			$inv = ( new Entities\Invoices\Retrieve() )
 				->setConnection( $this->getConnection() )
-				->setEntityId( $oInvoice->getId() )
+				->setEntityId( $inv->getId() )
 				->retrieve();
 		}
 
-		return $oInvoice;
+		return $inv;
 	}
 
 	/**
 	 * First attempts to locate a previously created invoice for this Payment.
-	 * @param \EDD_Payment $oPayment
+	 * @param \EDD_Payment $payment
 	 * @return Entities\Invoices\InvoiceVO[]
 	 */
-	public function createFreeagentInvoicesFromEddPayment( $oPayment ) {
+	public function createFreeagentInvoicesFromEddPayment( $payment ) {
 		return array_filter( array_map(
-			function ( $sTxnId ) {
-				/** @var string $sTxnId */
-				return $this->createFreeagentInvoiceFromChargeId( $sTxnId );
+			function ( $txnID ) {
+				return $this->createFreeagentInvoiceFromChargeId( $txnID );
 			},
-			( new Utilities\GetTransactionIdsFromPayment() )->retrieve( $oPayment )
+			( new Utilities\GetTransactionIdsFromPayment() )->retrieve( $payment )
 		) );
 	}
 
@@ -166,11 +165,11 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param ChargeVO $oCharge
+	 * @param ChargeVO $charge
 	 * @return \EDD_Payment|null
 	 */
-	protected function getEddPaymentFromCharge( $oCharge ) {
-		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $oCharge->id );
+	protected function getEddPaymentFromCharge( $charge ) {
+		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $charge->id );
 	}
 
 	/**
@@ -192,11 +191,11 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param \EDD_Payment $oEddPayment
+	 * @param \EDD_Payment $payment
 	 * @return array
 	 */
-	public function getFreeagentInvoiceIdsFromEddPayment( $oEddPayment ) {
-		$aIds = $oEddPayment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
+	public function getFreeagentInvoiceIdsFromEddPayment( $payment ) {
+		$aIds = $payment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
 		return is_array( $aIds ) ? $aIds : [];
 	}
 
@@ -206,7 +205,7 @@ trait CommonEddBridge {
 	 * @return $this
 	 */
 	public function storeFreeagentInvoiceIdForCharge( $oCharge, $oInvoice ) {
-		$aInvoiceIds[ $oCharge->getId() ] = $oInvoice->getId();
+		$aInvoiceIds[ $oCharge->id ] = $oInvoice->getId();
 		$this->getEddPaymentFromCharge( $oCharge )
 			 ->update_meta( self::KEY_FREEAGENT_INVOICE_IDS, $aInvoiceIds );
 		return $this;
@@ -220,26 +219,41 @@ trait CommonEddBridge {
 		return !is_null( $this->getEddPaymentFromCharge( $oCharge ) );
 	}
 
-	/**
-	 * @param ChargeVO $oCharge
-	 * @return bool
-	 */
-	protected function isPaymentEuVatMossRegion( $oCharge ) {
-		$sPaymentCountry = $this->getEddPaymentFromCharge( $oCharge )->address[ 'country' ];
-		return ( $sPaymentCountry != 'GB' &&
-				 array_key_exists( $sPaymentCountry, $this->getTaxCountriesRates() ) );
+	protected function getChargeCountry( ChargeVO $charge ) :bool {
+		return $this->getEddPaymentFromCharge( $charge )->address[ 'country' ];
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function getTaxCountriesRates() {
-		$aCountriesToRates = [];
-		foreach ( edd_get_tax_rates() as $aCountryRate ) {
-			if ( !empty( $aCountryRate[ 'country' ] ) ) {
-				$aCountriesToRates[ $aCountryRate[ 'country' ] ] = $aCountryRate[ 'rate' ];
+	protected function getVatNumber( ChargeVO $charge ) :string {
+		$userInfo = edd_get_payment_meta_user_info( $this->getEddPaymentFromCharge( $charge )->ID );
+		return empty( $userInfo[ 'vat_number' ] ) ? '' : $userInfo[ 'vat_number' ];
+	}
+
+	protected function isChargeInEcRegion( ChargeVO $charge ) :bool {
+		$country = $this->getChargeCountry( $charge );
+		return $country != 'GB' &&
+			   array_key_exists( $country, $this->getTaxCountriesRates() );
+	}
+
+	protected function getTaxCountriesRates() :array {
+		$countriesToRates = [];
+		foreach ( edd_get_tax_rates() as $countryRate ) {
+			if ( !empty( $countryRate[ 'country' ] ) ) {
+				$countriesToRates[ $countryRate[ 'country' ] ] = $countryRate[ 'rate' ];
 			}
 		}
-		return $aCountriesToRates;
+		return $countriesToRates;
+	}
+
+	protected function setupChargeEcStatus( ChargeVO $charge ) {
+		if ( $this->isChargeInEcRegion( $charge ) ) {
+			$vatNumber = $this->getVatNumber( $charge );
+			if ( !empty( $vatNumber ) ) {
+				// TODO: Check country is the same as the VAT country code??
+				$charge->ec_status = empty( $vatNumber ) ? 'EC VAT MOSS' : 'EC Services';
+			}
+		}
+		else {
+			$charge->ec_status = 'UK/Non-EC';
+		}
 	}
 }

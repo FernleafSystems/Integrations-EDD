@@ -13,22 +13,23 @@ use FernleafSystems\ApiWrappers\Freeagent\Entities;
 class EddCustomerToFreeagentContact {
 
 	use ConnectionConsumer;
+
 	const KEY_FREEAGENT_CONTACT_ID = 'freeagent_contact_id';
 
 	/**
 	 * @var Entities\Contacts\ContactVO
 	 */
-	private $oContact;
+	private $contact;
 
 	/**
 	 * @var \EDD_Customer
 	 */
-	private $oCustomer;
+	private $customer;
 
 	/**
 	 * @var \EDD_Payment
 	 */
-	private $oPayment;
+	private $payment;
 
 	/**
 	 * @return Entities\Contacts\ContactVO
@@ -83,29 +84,29 @@ class EddCustomerToFreeagentContact {
 		$pymt = $this->getPayment();
 
 		// Freeagent uses full country names; EDD uses ISO2 codes
-		$sPaymentCountry = $this->getCountryNameFromIso2Code( $pymt->address[ 'country' ] );
-		$aUserInfo = edd_get_payment_meta_user_info( $pymt->ID );
+		$paymentCountry = $this->getCountryNameFromIso2Code( $pymt->address[ 'country' ] );
+		$userInfo = edd_get_payment_meta_user_info( $pymt->ID );
 
-		$oOriginalContact = $this->getContact();
+		$originalContact = $this->getContact();
 
-		$oContact = ( new Entities\Contacts\Update() )
-			->setFirstName( $oOriginalContact->first_name )
-			->setLastName( $oOriginalContact->last_name )
+		$contact = ( new Entities\Contacts\Update() )
+			->setFirstName( $originalContact->first_name )
+			->setLastName( $originalContact->last_name )
 			->setConnection( $this->getConnection() )
 			->setEntityId( $this->getContact()->getId() )
 			->setEmail( $pymt->email )
-			->setAddress_Line( $aUserInfo[ 'line1' ], 1 )
-			->setAddress_Line( $aUserInfo[ 'line2' ], 2 )
-			->setAddress_Town( $aUserInfo[ 'city' ] )
-			->setAddress_Region( $aUserInfo[ 'state' ] )
-			->setAddress_PostalCode( $aUserInfo[ 'zip' ] )
-			->setAddress_Country( $sPaymentCountry )
-			->setSalesTaxNumber( $aUserInfo[ 'vat_number' ] )
-			->setOrganisationName( $aUserInfo[ 'company' ] )
+			->setAddress_Line( $userInfo[ 'line1' ], 1 )
+			->setAddress_Line( $userInfo[ 'line2' ], 2 )
+			->setAddress_Town( $userInfo[ 'city' ] )
+			->setAddress_Region( $userInfo[ 'state' ] )
+			->setAddress_PostalCode( $userInfo[ 'zip' ] )
+			->setAddress_Country( $paymentCountry )
+			->setSalesTaxNumber( $userInfo[ 'vat_number' ] )
+			->setOrganisationName( $userInfo[ 'company' ] )
 			->setUseContactLevelInvoiceSequence( true )
 			->update();
 
-		return $this->setContact( $oContact );
+		return $this->setContact( $contact );
 	}
 
 	/**
@@ -113,36 +114,36 @@ class EddCustomerToFreeagentContact {
 	 * @return string
 	 */
 	protected function getCountryNameFromIso2Code( $code ) {
-		$aCountries = edd_get_country_list();
-		$aCountries[ 'HR' ] = 'Croatia'; // bug when country name is Croatia/Hrvatska and FreeAgent doesn't understand
-		return isset( $aCountries[ $code ] ) ? $aCountries[ $code ] : $code;
+		$countries = edd_get_country_list();
+		$countries[ 'HR' ] = 'Croatia'; // bug when country name is Croatia/Hrvatska and FreeAgent doesn't understand
+		return $countries[ $code ] ?? $code;
 	}
 
 	/**
 	 * @return Entities\Contacts\ContactVO
 	 */
 	protected function getContact() {
-		if ( !isset( $this->oContact ) ) {
-			$this->oContact = ( new Entities\Contacts\Retrieve() )
+		if ( !isset( $this->contact ) ) {
+			$this->contact = ( new Entities\Contacts\Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID ) )
 				->retrieve();
 		}
-		return $this->oContact;
+		return $this->contact;
 	}
 
 	/**
 	 * @return \EDD_Customer
 	 */
 	public function getCustomer() {
-		return $this->oCustomer;
+		return $this->customer;
 	}
 
 	/**
 	 * @return \EDD_Payment
 	 */
 	public function getPayment() {
-		return $this->oPayment;
+		return $this->payment;
 	}
 
 	/**
@@ -150,7 +151,7 @@ class EddCustomerToFreeagentContact {
 	 * @return $this
 	 */
 	public function setContact( $oContact ) {
-		$this->oContact = $oContact;
+		$this->contact = $oContact;
 		return $this;
 	}
 
@@ -159,7 +160,7 @@ class EddCustomerToFreeagentContact {
 	 * @return $this
 	 */
 	public function setCustomer( $oCustomer ) {
-		$this->oCustomer = $oCustomer;
+		$this->customer = $oCustomer;
 		return $this;
 	}
 
@@ -168,7 +169,7 @@ class EddCustomerToFreeagentContact {
 	 * @return $this
 	 */
 	public function setPayment( $oPayment ) {
-		$this->oPayment = $oPayment;
+		$this->payment = $oPayment;
 		return $this;
 	}
 }

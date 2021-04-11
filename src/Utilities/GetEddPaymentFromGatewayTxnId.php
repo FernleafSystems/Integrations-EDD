@@ -9,22 +9,22 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 class GetEddPaymentFromGatewayTxnId {
 
 	/**
-	 * @param string $sTransactionId
+	 * @param string $txnID
 	 * @return \EDD_Payment|null
 	 */
-	public function retrieve( $sTransactionId ) {
-		$oPayment = null;
+	public function retrieve( $txnID ) {
+		$payment = null;
 
-		$nPaymentId = edd_get_purchase_id_by_transaction_id( $sTransactionId );
-		if ( !empty( $nPaymentId ) ) { // must be the first purchase of a subscription.
-			$oPayment = new \EDD_Payment( $nPaymentId );
+		$pID = edd_get_purchase_id_by_transaction_id( $txnID );
+		if ( !empty( $pID ) ) { // must be the first purchase of a subscription.
+			$payment = edd_get_payment( $pID );
 		}
 		else {
-			$oSub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $sTransactionId );
-			if ( !is_null( $oSub ) ) {
-				$oPayment = new \EDD_Payment( $oSub->get_original_payment_id() );
+			$sub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID );
+			if ( !is_null( $sub ) ) {
+				$payment = edd_get_payment( $sub->get_original_payment_id() );
 			}
 		}
-		return $oPayment;
+		return $payment;
 	}
 }
