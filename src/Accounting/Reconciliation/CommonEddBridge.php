@@ -220,7 +220,17 @@ trait CommonEddBridge {
 	}
 
 	protected function getChargeCountry( ChargeVO $charge ) :string {
-		return $this->getEddPaymentFromCharge( $charge )->address[ 'country' ];
+		$payment = $this->getEddPaymentFromCharge( $charge );
+		$country = $payment->address[ 'country' ];
+		if ( empty( $country ) ) {
+			if ( $payment->parent_payment > 0 ) {
+				$country = edd_get_payment( $payment->parent_payment )->address[ 'country' ];
+			}
+			else {
+				$country = 'US';
+			}
+		}
+		return $country;
 	}
 
 	protected function getVatNumber( ChargeVO $charge ) :string {
