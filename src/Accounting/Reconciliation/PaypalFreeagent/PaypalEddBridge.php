@@ -52,6 +52,21 @@ class PaypalEddBridge extends PaypalBridge {
 		return $charge;
 	}
 
+	protected function getTxnChargeDetails( $txnID ) {
+		try {
+			$txn = $this->getTxnChargeDetailsPayPalAPI( $txnID );
+		}
+		catch ( \Exception $e ) {
+			error_log( sprintf( '%s::%s: %s', __CLASS__, __METHOD__, $e->getMessage() ) );
+			$txn = $this->getTxnChargeDetailsLegacy( $txnID );
+		}
+		return $txn;
+	}
+
+	protected function getTxnChargeDetailsPayPalAPI( $txnID ) {
+		return ( new GetPaypalTransactionsFromPayment() )->retrieve( $txnID );
+	}
+
 	/**
 	 * @param DataWrapper\PayoutVO $payout
 	 * @return int|null
