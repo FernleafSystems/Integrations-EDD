@@ -13,7 +13,7 @@ class GetPaypalTransactionsFromPayment {
 
 	use EddPaymentConsumer;
 
-	public function retrieve( int $expected = -1 ) :TransactionVO {
+	public function retrieve( $txnID, int $expected = -1 ) :TransactionVO {
 		$p = $this->getEddPayment();
 		$carb = Services::Request()->carbon( true );
 		$carb->setTimeFromTimeString( $p->date );
