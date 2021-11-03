@@ -64,7 +64,9 @@ class PaypalEddBridge extends PaypalBridge {
 	}
 
 	protected function getTxnChargeDetailsPayPalAPI( $txnID ) {
-		return ( new GetPaypalTransactionsFromPayment() )->retrieve( $txnID );
+		return ( new GetPaypalTransactionsFromPayment() )
+			->setEddPayment( ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $txnID ) )
+			->retrieve( $txnID );
 	}
 
 	/**
