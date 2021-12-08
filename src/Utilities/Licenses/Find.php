@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
-/**
- * Class Find
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
- */
 class Find extends Retrieve {
 
 	/**

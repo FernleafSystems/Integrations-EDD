@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
-/**
- * Class EddPaymentConsumer
- * @package FernleafSystems\Integrations\Edd\Consumers
- */
 trait EddPaymentConsumer {
 
 	/**

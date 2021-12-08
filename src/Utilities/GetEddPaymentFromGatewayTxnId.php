@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-/**
- * Class GetEddPaymentFromGatewayTxnId
- * @package FernleafSystems\Integrations\Edd\Utilities
- */
 class GetEddPaymentFromGatewayTxnId {
 
 	/**

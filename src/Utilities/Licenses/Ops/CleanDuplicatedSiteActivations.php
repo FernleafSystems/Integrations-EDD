@@ -7,10 +7,6 @@ use FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations\EddActivatio
 use FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations\Retrieve;
 use FernleafSystems\Integrations\Edd\Utilities\Licenses\LicensesIterator;
 
-/**
- * Class CleanDuplicatedSiteActivations
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops
- */
 class CleanDuplicatedSiteActivations {
 
 	use Consumers\EddDownloadConsumer;

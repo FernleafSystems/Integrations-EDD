@@ -6,9 +6,6 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Customer_Query) uses "offset" to paginate
- *
- * Class CustomerIterator
- * @package FernleafSystems\Integrations\Edd\Utilities\Customers
  */
 class CustomerIterator extends CommonEntityIterator {
 

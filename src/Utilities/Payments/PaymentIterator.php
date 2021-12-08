@@ -6,9 +6,6 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Payments_Query) uses "page" to paginate
- *
- * Class PaymentIterator
- * @package FernleafSystems\Integrations\Edd\Utilities\Payments
  */
 class PaymentIterator extends CommonEntityIterator {
 
@@ -54,18 +51,32 @@ class PaymentIterator extends CommonEntityIterator {
 	}
 
 	/**
+	 * The query to count EDD Payment is done through a separate query class
+	 * and the parameters and structure is different.
 	 * @return int
 	 */
 	protected function runQueryCount() {
-		$aCounts = (array)wp_count_posts( 'edd_payment' );
-		$aFil = $this->getFinalQueryFilters();
-		$aStati = isset( $aFil[ 'status' ] ) ? $aFil[ 'status' ] : edd_get_payment_status_keys();
-		if ( is_string( $aStati ) ) {
-			$aStati = array_map( 'trim', explode( ',', $aStati ) );
+		$filters = $this->getFinalQueryFilters();
+		if ( isset( $filters[ 'start_date' ] ) ) {
+			$filters[ 'start-date' ] = date( 'm/d/Y', $filters[ 'start_date' ] );
+			unset( $filters[ 'start_date' ] );
 		}
-		if ( !in_array( 'all', $aStati ) ) {
-			$aCounts = array_intersect_key( $aCounts, array_flip( $aStati ) );
+		if ( isset( $filters[ 'end_date' ] ) ) {
+			$filters[ 'end-date' ] = date( 'm/d/Y', $filters[ 'end_date' ] );
+			unset( $filters[ 'end_date' ] );
 		}
-		return array_sum( $aCounts );
+		unset( $filters[ 'number' ] );
+		unset( $filters[ 'page' ] );
+
+		$eddCounts = (array)edd_count_payments( $filters );
+		$stati = $filters[ 'status' ] ?? edd_get_payment_status_keys();
+		if ( is_string( $stati ) ) {
+			$stati = array_map( 'trim', explode( ',', $stati ) );
+		}
+		if ( !in_array( 'all', $stati ) ) {
+			$eddCounts = array_intersect_key( $eddCounts, array_flip( $stati ) );
+		}
+
+		return (int)array_sum( $eddCounts );
 	}
 }

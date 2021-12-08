@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Payments;
 
-/**
- * Class RetrieveAll
- * @package FernleafSystems\Integrations\Edd\Utilities\Payments
- */
 class RetrieveAll {
 
 	/**

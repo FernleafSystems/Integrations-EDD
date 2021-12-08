@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-/**
- * Class GetDownloadsFromPayment
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
- */
 class GetDownloadsFromPayment {
 
 	/**

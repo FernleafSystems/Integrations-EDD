@@ -13,8 +13,6 @@ use FernleafSystems\Integrations\Freeagent\Reconciliation\Invoices\CreateFromCha
 
 /**
  * Implements the FernleafSystems\Integrations\Freeagent\Reconciliation\Bridge\BridgeInterface
- * Trait CommonEddBridge
- * @package FernleafSystems\Integrations\Edd\Accounting\Reconciliation
  */
 trait CommonEddBridge {
 

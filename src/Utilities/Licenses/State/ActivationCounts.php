@@ -3,8 +3,6 @@
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\State;
 
 /**
- * Class Counts
- * @package FernleafSystems\Wordpress\Plugin\EddKeyless\Module\Keyless\Lib\Licenses
  * @property bool $unlimited
  * @property int  $limit
  * @property int  $assigned

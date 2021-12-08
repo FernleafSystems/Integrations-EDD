@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
 use FernleafSystems\Integrations\Edd\Consumers;
 
-/**
- * Class BaseLicenses
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
- */
 abstract class BaseLicenses {
 
 	use Consumers\EddCustomerConsumer;

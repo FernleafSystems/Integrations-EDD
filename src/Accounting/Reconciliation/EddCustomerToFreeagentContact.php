@@ -7,8 +7,6 @@ use FernleafSystems\ApiWrappers\Freeagent\Entities;
 
 /**
  * TODO: Abstract this whole thing into the Freeagent Integration Bridge
- * Class EddCustomerToFreeagentContact
- * @package FernleafSystems\Wordpress\Plugin\Edd\Freeagent\Adaptation
  */
 class EddCustomerToFreeagentContact {
 

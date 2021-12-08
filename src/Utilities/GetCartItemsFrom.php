@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 
-/**
- * Class GetCartItemsFromEddSubscription
- * @package FernleafSystems\Integrations\Edd\Utilities
- */
 class GetCartItemsFrom {
 
 	/**

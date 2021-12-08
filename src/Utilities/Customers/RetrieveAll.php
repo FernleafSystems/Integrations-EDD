@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Customers;
 
-/**
- * Class RetrieveAll
- * @package FernleafSystems\Integrations\Edd\Utilities\Customers
- */
 class RetrieveAll {
 
 	/**

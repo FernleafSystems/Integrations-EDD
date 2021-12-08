@@ -8,10 +8,6 @@ use FernleafSystems\Utilities\{
 	Logic\OneTimeExecute
 };
 
-/**
- * Class BaseLicenses
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
- */
 abstract class BaseState extends BaseLicenses {
 
 	use OneTimeExecute;

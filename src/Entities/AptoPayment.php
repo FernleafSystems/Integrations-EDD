@@ -3,8 +3,6 @@
 namespace FernleafSystems\Integrations\Edd\Entities;
 
 /**
- * Class AptoPayment
- * @package FernleafSystems\Integrations\Edd\Entities
  * @property $user_id     int
  * @property $customer_id int
  * @property $status      string

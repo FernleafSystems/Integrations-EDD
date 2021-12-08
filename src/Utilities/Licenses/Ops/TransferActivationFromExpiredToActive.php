@@ -5,10 +5,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops;
 use FernleafSystems\Integrations\Edd\Consumers;
 use FernleafSystems\Wordpress\Services\Utilities\Licenses\EddActions;
 
-/**
- * Class TransferActivationFromExpiredToActive
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops
- */
 class TransferActivationFromExpiredToActive {
 
 	use Consumers\EddDownloadConsumer;

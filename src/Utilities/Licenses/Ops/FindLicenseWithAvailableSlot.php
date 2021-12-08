@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops;
 
 use FernleafSystems\Integrations\Edd\Utilities\Licenses\BaseLicenses;
 
-/**
- * Class FindLicenseWithEmptySlot
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops
- */
 class FindLicenseWithAvailableSlot extends BaseLicenses {
 
 	/**

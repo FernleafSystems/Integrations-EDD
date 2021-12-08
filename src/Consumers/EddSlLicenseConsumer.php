@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
-/**
- * Trait EddSlLicenseConsumer
- * @package FernleafSystems\Integrations\Edd\Consumers
- */
 trait EddSlLicenseConsumer {
 
 	/**

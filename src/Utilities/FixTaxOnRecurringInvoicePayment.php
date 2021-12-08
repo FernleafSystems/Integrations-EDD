@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-/**
- * Class FixTaxOnRecurringInvoice
- * @package FernleafSystems\Integrations\Edd\Utilities
- */
 class FixTaxOnRecurringInvoicePayment {
 
 	/**

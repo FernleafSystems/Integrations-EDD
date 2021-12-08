@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-/**
- * Class GetSubscriptionsFromPaymentId
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
- */
 class GetSubscriptionsFromPaymentId {
 
 	/**
