@@ -5,8 +5,6 @@ namespace FernleafSystems\Integrations\Edd\Entities;
 use FernleafSystems\Utilities\Data\Adapter\DynPropertiesClass;
 
 /**
- * Class CartItemVo
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities\Entities
  * @property int    $id                   - download ID
  * @property float  $discount
  * @property array  $item_number          - cart item specifics

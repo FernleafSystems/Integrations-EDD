@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 
-/**
- * Class GetTransactionIdFromCartItem
- * @package FernleafSystems\WordPress\Integrations\Edd\Utilities
- */
 class GetTransactionIdFromCartItem {
 
 	/**

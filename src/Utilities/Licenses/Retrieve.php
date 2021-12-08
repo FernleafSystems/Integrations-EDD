@@ -5,10 +5,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
 use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
 
-/**
- * Class Retrieve
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
- */
 class Retrieve {
 
 	use EddCustomerConsumer;

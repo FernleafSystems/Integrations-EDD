@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
-/**
- * Trait EddDownloadConsumer
- * @package FernleafSystems\Integrations\Edd\Consumers
- */
 trait EddDownloadConsumer {
 
 	/**

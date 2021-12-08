@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations;
 
 use FernleafSystems\Wordpress\Services\Utilities\Licenses\EddActions;
 
-/**
- * Class RetrieveForUrl
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations
- */
 class Retrieve {
 
 	/**

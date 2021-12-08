@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities;
 
-/**
- * Class GetSubscriptionsFromGatewayTxnId
- * @package FernleafSystems\Integrations\Edd\Utilities
- */
 class GetSubscriptionsFromGatewayTxnId {
 
 	/**

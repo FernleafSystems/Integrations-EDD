@@ -3,8 +3,6 @@
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\State;
 
 /**
- * Class EnumerateSites
- * @package FernleafSystems\Wordpress\Plugin\EddKeyless\Module\Keyless\Lib\Licenses
  * @property string[] $sites
  * @property string[] $sites_expired
  */

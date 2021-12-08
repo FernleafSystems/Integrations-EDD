@@ -5,10 +5,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops;
 use FernleafSystems\Integrations\Edd\Consumers;
 use FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations\Retrieve;
 
-/**
- * Class LocateViableLicense
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops
- */
 class LocateViableLicense {
 
 	use Consumers\EddDownloadConsumer;

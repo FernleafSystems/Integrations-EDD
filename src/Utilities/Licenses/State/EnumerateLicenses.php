@@ -3,8 +3,6 @@
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\State;
 
 /**
- * Class EnumerateSites
- * @package FernleafSystems\Wordpress\Plugin\EddKeyless\Module\Keyless\Lib\Licenses
  * @property \EDD_SL_License[] $licenses
  */
 class EnumerateLicenses extends BaseState {

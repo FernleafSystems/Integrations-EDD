@@ -6,9 +6,6 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_Payments_Query) uses "page" to paginate
- *
- * Class PaymentIterator
- * @package FernleafSystems\Integrations\Edd\Utilities\Payments
  */
 class PaymentIterator extends CommonEntityIterator {
 
@@ -57,15 +54,15 @@ class PaymentIterator extends CommonEntityIterator {
 	 * @return int
 	 */
 	protected function runQueryCount() {
-		$aCounts = (array)wp_count_posts( 'edd_payment' );
-		$aFil = $this->getFinalQueryFilters();
-		$aStati = isset( $aFil[ 'status' ] ) ? $aFil[ 'status' ] : edd_get_payment_status_keys();
-		if ( is_string( $aStati ) ) {
-			$aStati = array_map( 'trim', explode( ',', $aStati ) );
+		$counts = (array)wp_count_posts( 'edd_payment' );
+		$filters = $this->getFinalQueryFilters();
+		$stati = $filters[ 'status' ] ?? edd_get_payment_status_keys();
+		if ( is_string( $stati ) ) {
+			$stati = array_map( 'trim', explode( ',', $stati ) );
 		}
-		if ( !in_array( 'all', $aStati ) ) {
-			$aCounts = array_intersect_key( $aCounts, array_flip( $aStati ) );
+		if ( !in_array( 'all', $stati ) ) {
+			$counts = array_intersect_key( $counts, array_flip( $stati ) );
 		}
-		return array_sum( $aCounts );
+		return array_sum( $counts );
 	}
 }

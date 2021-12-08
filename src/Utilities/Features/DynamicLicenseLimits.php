@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Features;
 
-/**
- * Class DynamicLicenseLimits
- * @package FernleafSystems\Integrations\Edd\Utilities\Features
- */
 class DynamicLicenseLimits {
 
 	/**

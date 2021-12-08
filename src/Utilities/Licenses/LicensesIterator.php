@@ -6,9 +6,6 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
 
 /**
  * The query class (EDD_SL_License_DB) uses "offset" to paginate
- *
- * Class SubscriptionsIterator
- * @package FernleafSystems\Integrations\Edd\Utilities\Subscriptions
  */
 class LicensesIterator extends CommonEntityIterator {
 

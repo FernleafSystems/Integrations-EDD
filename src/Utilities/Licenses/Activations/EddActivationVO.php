@@ -5,8 +5,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations;
 use FernleafSystems\Utilities\Data\Adapter\StdClassAdapter;
 
 /**
- * Class EddActivationVO
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations
  * @property int    $site_id
  * @property string $site_name
  * @property int    $license_id

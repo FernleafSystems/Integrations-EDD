@@ -2,32 +2,27 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Payments;
 
-/**
- * Class ProcessAllPayments
- * @package FernleafSystems\Integrations\Edd\Utilities
- */
 class ProcessAll {
 
 	/**
 	 * @param callable $cProcessFunction
-	 * @param array    $aQueryOptions
+	 * @param array    $query
 	 */
-	public function process( $cProcessFunction, $aQueryOptions = [] ) {
+	public function process( $cProcessFunction, $query = [] ) {
 
-		$aQueryOptions = array_merge(
+		$query = array_merge(
 			[
 				'orderby' => 'ID',
 				'order'   => 'ASC',
 				'page'    => 1,
 			],
-			$aQueryOptions
+			$query
 		);
 
 		do {
-			$aPayments = ( new \EDD_Payments_Query( $aQueryOptions ) )->get_payments();
-			array_map( $cProcessFunction, $aPayments );
-
-			$aQueryOptions[ 'page' ]++;
-		} while ( !empty( $aPayments ) );
+			$payments = ( new \EDD_Payments_Query( $query ) )->get_payments();
+			array_map( $cProcessFunction, $payments );
+			$query[ 'page' ]++;
+		} while ( !empty( $payments ) );
 	}
 }

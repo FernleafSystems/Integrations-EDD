@@ -4,10 +4,6 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Base;
 
 use Elliotchance\Iterator\AbstractPagedIterator;
 
-/**
- * Class CommonEntityIterator
- * @package FernleafSystems\Integrations\Edd\Utilities\Base
- */
 abstract class CommonEntityIterator extends AbstractPagedIterator {
 
 	const PAGE_LIMIT = 50;

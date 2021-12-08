@@ -2,10 +2,6 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Features;
 
-/**
- * Class LimitItemInCartToOne
- * @package FernleafSystems\Integrations\Edd\Utilities\Features
- */
 class LimitItemInCartToOne {
 
 	public function run() {

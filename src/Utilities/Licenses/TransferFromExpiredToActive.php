@@ -3,8 +3,6 @@
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
 /**
- * Class TransferFromExpiredToActive
- * @package FernleafSystems\Integrations\Edd\Utilities\Licenses
  * @deprecated
  */
 class TransferFromExpiredToActive extends Retrieve {
