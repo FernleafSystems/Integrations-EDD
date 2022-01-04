@@ -141,17 +141,17 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param string $sGatewayTxnId
+	 * @param string $gatewayTxnId
 	 * @return CartItemVo
 	 * @throws \Exception
 	 */
-	protected function getCartItemDetailsFromGatewayTxn( $sGatewayTxnId ) {
-		$aCartItems = ( new Utilities\GetCartItemsFrom() )
-			->transactionId( $sGatewayTxnId );
-		if ( count( $aCartItems ) != 1 ) { // TODO - if we offer non-subscription items!
-			error_log( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $sGatewayTxnId ) );
+	protected function getCartItemDetailsFromGatewayTxn( $gatewayTxnId ) {
+		$items = ( new Utilities\GetCartItemsFrom() )
+			->transactionId( $gatewayTxnId );
+		if ( count( $items ) != 1 ) { // TODO - if we offer non-subscription items!
+			error_log( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $gatewayTxnId ) );
 		}
-		return array_pop( $aCartItems );
+		return array_pop( $items );
 	}
 
 	/**
