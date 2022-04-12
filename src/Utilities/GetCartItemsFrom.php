@@ -18,19 +18,22 @@ class GetCartItemsFrom {
 	 * @param string $gatewayTxnId
 	 * @return CartItemVo[]
 	 */
-	public function transactionId( $gatewayTxnId ) {
+	public function transactionId( $gatewayTxnId ) :array {
 		$items = [];
 
-		$nPaymentId = edd_get_purchase_id_by_transaction_id( $gatewayTxnId );
-		if ( empty( $nPaymentId ) ) {
+		$pID = edd_get_purchase_id_by_transaction_id( $gatewayTxnId );
+		if ( empty( $pID ) ) {
+			var_dump($gatewayTxnId);
 			$sub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayTxnId );
-			$item = $this->subscription( $sub );
-			if ( !empty( $item ) ) {
-				$items[] = $item;
+			if ( !empty( $sub ) ) {
+				$item = $this->subscription( $sub );
+				if ( !empty( $item ) ) {
+					$items[] = $item;
+				}
 			}
 		}
 		else { // must be the first purchase of a subscription.
-			$items = $this->paymentId( $nPaymentId );
+			$items = $this->paymentId( $pID );
 		}
 		return $items;
 	}
@@ -40,13 +43,13 @@ class GetCartItemsFrom {
 	 * @return CartItemVo|null
 	 */
 	public function subscription( $sub ) {
-		$oItem = null;
+		$item = null;
 
-		$aItems = $this->convertToCartItemVo( $sub->get_original_payment_id(), $sub->product_id );
-		if ( !empty( $aItems ) ) {
-			$oItem = array_pop( $aItems )->setParentSubscriptionId( $sub->id );
+		$items = $this->convertToCartItemVo( $sub->get_original_payment_id(), $sub->product_id );
+		if ( !empty( $items ) ) {
+			$item = array_pop( $items )->setParentSubscriptionId( $sub->id );
 		}
-		return $oItem;
+		return $item;
 	}
 
 	/**
