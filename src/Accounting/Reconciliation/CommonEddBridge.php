@@ -16,9 +16,9 @@ use FernleafSystems\Integrations\Freeagent\Reconciliation\Invoices\CreateFromCha
  */
 trait CommonEddBridge {
 
-	use ConnectionConsumer,
-		EddPaymentConsumer,
-		FreeagentConfigVoConsumer;
+	use ConnectionConsumer;
+	use EddPaymentConsumer;
+	use FreeagentConfigVoConsumer;
 
 	public function __construct() {
 		EDD_Recurring(); // initializes anything that's required
@@ -31,7 +31,7 @@ trait CommonEddBridge {
 	 */
 	public function createFreeagentContact( $oCharge, $bUpdateOnly = false ) {
 		$payment = $this->getEddPaymentFromCharge( $oCharge );
-		return $this->createFreeagentContactFromPayment( $payment, $bUpdateOnly );
+		return $this->createFreeagentContactFromPayment( $payment );
 	}
 
 	/**
@@ -52,16 +52,15 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param \EDD_Payment $oPayment
-	 * @param bool         $bUpdateOnly
+	 * @param bool         $updateOnly
 	 * @return Entities\Contacts\ContactVO
 	 */
-	protected function createFreeagentContactFromPayment( $oPayment, $bUpdateOnly = false ) {
-		$oContactCreator = ( new EddCustomerToFreeagentContact() )
+	protected function createFreeagentContactFromPayment( \EDD_Payment $payment, $updateOnly = false ) {
+		$creator = ( new EddCustomerToFreeagentContact() )
 			->setConnection( $this->getConnection() )
-			->setCustomer( $this->getEddCustomerFromEddPayment( $oPayment ) )
-			->setPayment( $oPayment );
-		return $bUpdateOnly ? $oContactCreator->update() : $oContactCreator->create();
+			->setCustomer( $this->getEddCustomerFromEddPayment( $payment ) )
+			->setPayment( $payment );
+		return $creator->create();
 	}
 
 	/**

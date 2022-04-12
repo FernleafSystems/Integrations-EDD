@@ -30,49 +30,47 @@ class EddCustomerToFreeagentContact {
 	private $payment;
 
 	/**
-	 * @return Entities\Contacts\ContactVO
+	 * @throws \Exception
 	 */
-	public function create() {
+	public function create( bool $updateFromPayment = true ) :Entities\Contacts\ContactVO {
 
 		// If there is no link between Customer and Contact, create it.
-		$nFreeagentContactId = $this->getCustomer()
-									->get_meta( self::KEY_FREEAGENT_CONTACT_ID );
-		if ( empty( $nFreeagentContactId ) ) {
-			$this->createNewFreeagentContact();
+		$contactID = $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID );
+		if ( empty( $contactID ) ) {
+			$id = $this->createNewFreeagentContact();
+			if ( empty( $id ) ) {
+				throw new \Exception( 'Failed to create new Freeagent contact' );
+			}
 		}
 
-		return $this->update();
-	}
-
-	/**
-	 * @return Entities\Contacts\ContactVO
-	 */
-	public function update() {
-		// Now update the Contact with any business information from the Payment.
-		return $this->updateContactUsingPaymentInfo()
-					->getContact();
-	}
-
-	/**
-	 * @return string
-	 */
-	protected function createNewFreeagentContact() {
-		$oCustomer = $this->getCustomer();
-		$aNames = explode( ' ', $oCustomer->name, 2 );
-		if ( empty( $aNames[ 1 ] ) ) {
-			$aNames[ 1 ] = 'Surname-Unknown';
+		if ( $updateFromPayment ) {
+			$this->updateContactUsingPaymentInfo();
 		}
 
-		$oContact = ( new Entities\Contacts\Create() )
+		return $this->getContact();
+	}
+
+	public function update() :Entities\Contacts\ContactVO {
+		return $this->create();
+	}
+
+	protected function createNewFreeagentContact() :string {
+		$customer = $this->getCustomer();
+		$names = explode( ' ', $customer->name, 2 );
+		if ( empty( $names[ 1 ] ) ) {
+			$names[ 1 ] = 'Surname-Unknown';
+		}
+
+		$contact = ( new Entities\Contacts\Create() )
 			->setConnection( $this->getConnection() )
-			->setFirstName( $aNames[ 0 ] )
-			->setLastName( $aNames[ 1 ] )
-			->setEmail( $oCustomer->email )
+			->setFirstName( $names[ 0 ] )
+			->setLastName( $names[ 1 ] )
+			->setEmail( $customer->email )
 			->create();
 
-		$oCustomer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $oContact->getId() );
+		$customer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $contact->getId() );
 
-		return $oContact->getId();
+		return (string)$contact->getId();
 	}
 
 	/**
@@ -102,6 +100,7 @@ class EddCustomerToFreeagentContact {
 			->setSalesTaxNumber( $userInfo[ 'vat_number' ] ?? '' )
 			->setOrganisationName( $userInfo[ 'company' ] ?? '' )
 			->setUseContactLevelInvoiceSequence( true )
+			->setStatus( 'Active' )
 			->update();
 
 		return $this->setContact( $contact );
@@ -117,57 +116,39 @@ class EddCustomerToFreeagentContact {
 		return $countries[ $code ] ?? $code;
 	}
 
-	/**
-	 * @return Entities\Contacts\ContactVO
-	 */
-	protected function getContact() {
+	protected function getContact() :?Entities\Contacts\ContactVO {
 		if ( !isset( $this->contact ) ) {
-			$this->contact = ( new Entities\Contacts\Retrieve() )
+			$contact = ( new Entities\Contacts\Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID ) )
 				->retrieve();
+			if ( !empty( $contact ) ) {
+				$this->contact = $contact;
+			}
 		}
 		return $this->contact;
 	}
 
-	/**
-	 * @return \EDD_Customer
-	 */
-	public function getCustomer() {
+	public function getCustomer() :?\EDD_Customer {
 		return $this->customer;
 	}
 
-	/**
-	 * @return \EDD_Payment
-	 */
-	public function getPayment() {
+	public function getPayment() :?\EDD_Payment {
 		return $this->payment;
 	}
 
-	/**
-	 * @param Entities\Contacts\ContactVO $oContact
-	 * @return $this
-	 */
-	public function setContact( $oContact ) {
-		$this->contact = $oContact;
+	public function setContact( Entities\Contacts\ContactVO $contact ) :self {
+		$this->contact = $contact;
 		return $this;
 	}
 
-	/**
-	 * @param \EDD_Customer $oCustomer
-	 * @return $this
-	 */
-	public function setCustomer( $oCustomer ) {
-		$this->customer = $oCustomer;
+	public function setCustomer( \EDD_Customer $customer ) :self {
+		$this->customer = $customer;
 		return $this;
 	}
 
-	/**
-	 * @param \EDD_Payment $oPayment
-	 * @return $this
-	 */
-	public function setPayment( $oPayment ) {
-		$this->payment = $oPayment;
+	public function setPayment( \EDD_Payment $payment ) :self {
+		$this->payment = $payment;
 		return $this;
 	}
 }
