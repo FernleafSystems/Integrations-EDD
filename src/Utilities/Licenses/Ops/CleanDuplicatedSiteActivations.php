@@ -69,26 +69,25 @@ class CleanDuplicatedSiteActivations {
 	/**
 	 * @return EddActivationVO[][]
 	 */
-	private function getActivationsSortedBySite() {
+	private function getActivationsSortedBySite() :array {
 
 		$licIT = new LicensesIterator();
 		$licIT->filterByCustomer( $this->getEddCustomer()->id );
 
-		/** @var EddActivationVO[][] $activByURL */
-		$activByURL = [];
-		foreach ( $licIT as $oLic ) {
-			foreach ( ( new Retrieve() )->forLicense( $oLic ) as $oAct ) {
-				if ( !isset( $activByURL[ $oAct->site_name ] ) ) {
-					$activByURL[ $oAct->site_name ] = [];
+		/** @var EddActivationVO[][] $byURLs */
+		$byURLs = [];
+		foreach ( $licIT as $lic ) {
+			if ( !empty( $lic ) ) {
+				foreach ( ( new Retrieve() )->forLicense( $lic ) as $activation ) {
+					if ( !isset( $byURLs[ $activation->site_name ] ) ) {
+						$byURLs[ $activation->site_name ] = [];
+					}
+					$byURLs[ $activation->site_name ][] = $activation;
 				}
-				$activByURL[ $oAct->site_name ][] = $oAct;
 			}
 		}
 
 		// Keep only the URLs where their activation count is greater 1
-		return array_filter(
-			$activByURL,
-			fn( $aActs ) => count( $aActs ) > 1
-		);
+		return array_filter( $byURLs, fn( $activations ) => count( $activations ) > 1 );
 	}
 }
