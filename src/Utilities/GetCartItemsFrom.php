@@ -23,7 +23,6 @@ class GetCartItemsFrom {
 
 		$pID = edd_get_purchase_id_by_transaction_id( $gatewayTxnId );
 		if ( empty( $pID ) ) {
-			var_dump($gatewayTxnId);
 			$sub = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayTxnId );
 			if ( !empty( $sub ) ) {
 				$item = $this->subscription( $sub );

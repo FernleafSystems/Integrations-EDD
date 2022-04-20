@@ -21,13 +21,13 @@ class LocateViableLicense {
 	public function locate( string $url ) :?\EDD_SL_License {
 		$licHome = null;
 
-		$oC = $this->getEddCustomer();
+		$c = $this->getEddCustomer();
 
-		$aActive = [];
-		$aExpired = [];
+		$activeLicenses = [];
+		$expired = [];
 		foreach ( ( new Retrieve() )->forUrl( $url ) as $oAct ) {
 			$lic = new \EDD_SL_License( $oAct->license_id );
-			if ( !empty( $oC ) && $lic->customer_id !== $oC->id ) {
+			if ( !empty( $c ) && $lic->customer_id !== $c->id ) {
 				continue;
 			}
 			if ( $lic->get_download()->get_ID() !== $this->getEddDownload()->get_ID() ) {
@@ -35,43 +35,41 @@ class LocateViableLicense {
 			}
 
 			if ( $lic->status === 'disabled' || $lic->is_expired() ) {
-				$aExpired[] = $lic;
+				$expired[] = $lic;
 			}
 			else {
-				$aActive[] = $lic;
+				$activeLicenses[] = $lic;
 			}
 		}
 
-		$bRunLicenseClean = false;
-		if ( !empty( $aActive ) ) {
-			$licHome = array_pop( $aActive );
-			if ( empty( $oC ) ) {
-				$oC = new \EDD_Customer( $licHome->customer_id );
+		$runLicenseClean = false;
+		if ( !empty( $activeLicenses ) ) {
+			$licHome = array_pop( $activeLicenses );
+			if ( empty( $c ) ) {
+				$c = new \EDD_Customer( $licHome->customer_id );
 			}
-			$bRunLicenseClean = $oC instanceof \EDD_Customer && !empty( $aActive ); // multiple active for site.
+			$runLicenseClean = $c instanceof \EDD_Customer && !empty( $activeLicenses ); // multiple active for site.
 		}
-		elseif ( empty( $aActive ) && !empty( $aExpired ) ) {
-			/** @var \EDD_SL_License $oExpiredLic */
-			$oExpiredLic = reset( $aExpired );
-			if ( empty( $oC ) ) {
-				$oC = new \EDD_Customer( $oExpiredLic->customer_id );
+		elseif ( !empty( $expired ) ) {
+			/** @var \EDD_SL_License $expiredLic */
+			$expiredLic = reset( $expired );
+			if ( empty( $c ) ) {
+				$c = new \EDD_Customer( $expiredLic->customer_id );
 			}
-			if ( $oC instanceof \EDD_Customer && $oC->id > 0 ) {
+			if ( $c instanceof \EDD_Customer && $c->id > 0 ) {
 				$licHome = ( new TransferActivationFromExpiredToActive() )
-					->setEddCustomer( $oC )
+					->setEddCustomer( $c )
 					->setEddDownload( $this->getEddDownload() )
-					->transfer( $oExpiredLic, $url );
-				$bRunLicenseClean = true;
+					->transfer( $expiredLic, $url );
+				$runLicenseClean = true;
 			}
 		}
 
-		if ( $bRunLicenseClean && $licHome instanceof \EDD_SL_License ) {
-			if ( $oC instanceof \EDD_Customer ) {
-				( new CleanDuplicatedSiteActivations() )
-					->setEddCustomer( $oC )
-					->setEddDownload( $this->getEddDownload() )
-					->clean();
-			}
+		if ( $runLicenseClean && $licHome instanceof \EDD_SL_License && $c instanceof \EDD_Customer ) {
+			( new CleanDuplicatedSiteActivations() )
+				->setEddCustomer( $c )
+				->setEddDownload( $this->getEddDownload() )
+				->clean();
 		}
 
 		return $licHome;

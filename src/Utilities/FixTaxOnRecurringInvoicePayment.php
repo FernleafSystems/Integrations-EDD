@@ -5,35 +5,33 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 class FixTaxOnRecurringInvoicePayment {
 
 	/**
-	 * @param \EDD_Payment $oPayment
+	 * @param \EDD_Payment $pym
 	 */
-	public function fix( $oPayment ) {
-		if ( $oPayment->tax == 0 && $oPayment->status == 'edd_subscription'
-			 && count( $oPayment->cart_details ) == 1 ) { // It's an EDD Renewal (not first charge)
+	public function fix( $pym ) {
+		if ( $pym->tax == 0 && $pym->status == 'edd_subscription'
+			 && count( $pym->cart_details ) == 1 ) { // It's an EDD Renewal (not first charge)
 
-			$oSub = new \EDD_Subscription( $oPayment->get_meta( 'subscription_id' ) );
-			$nOriginalPaymentTaxRate = ( new \EDD_Payment( $oSub->get_original_payment_id() ) )->tax_rate;
+			$sub = new \EDD_Subscription( $pym->get_meta( 'subscription_id' ) );
+			$originalTaxRate = ( new \EDD_Payment( $sub->get_original_payment_id() ) )->tax_rate;
 
-			$aCartItem = array_pop( $oPayment->cart_details );
+			$cartItem = array_pop( $pym->cart_details );
 
-			if ( $nOriginalPaymentTaxRate > 0 && $oPayment->tax == 0 ) {
+			if ( $originalTaxRate > 0 && $pym->tax == 0 ) {
 
-				$nNewItemPrice = $aCartItem[ 'item_price' ]/( 1 + $nOriginalPaymentTaxRate );
-				$nNewTax = $aCartItem[ 'item_price' ] - $nNewItemPrice;
-				$nPriceId = isset( $aCartItem[ 'item_number' ][ 'options' ][ 'price_id' ] ) ? $aCartItem[ 'item_number' ][ 'options' ][ 'price_id' ] : false;
+				$newItemPrice = $cartItem[ 'item_price' ]/( 1 + $originalTaxRate );
 
-				$oPayment->remove_download( $aCartItem[ 'id' ] );
-				$oPayment->add_download(
-					$aCartItem[ 'id' ],
+				$pym->remove_download( $cartItem[ 'id' ] );
+				$pym->add_download(
+					$cartItem[ 'id' ],
 					[
-						'item_price' => $nNewItemPrice,
-						'price_id'   => $nPriceId,
-						'tax'        => $nNewTax,
+						'item_price' => $newItemPrice,
+						'price_id'   => $cartItem[ 'item_number' ][ 'options' ][ 'price_id' ] ?? false,
+						'tax'        => $cartItem[ 'item_price' ] - $newItemPrice,
 					]
 				);
 
-				$oPayment->tax = $nOriginalPaymentTaxRate;
-				$oPayment->save();
+				$pym->tax = $originalTaxRate;
+				$pym->save();
 			}
 		}
 	}
