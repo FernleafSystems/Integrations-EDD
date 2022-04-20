@@ -5,46 +5,45 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 class GetDownloadsFromPayment {
 
 	/**
-	 * @param \EDD_Payment $oPayment
+	 * @param \EDD_Payment $pym
 	 * @return \EDD_Download[]
 	 */
-	public function asObjects( $oPayment ) {
-		return $this->retrieve( $oPayment, 'objects' );
+	public function asObjects( $pym ) :array {
+		return $this->retrieve( $pym, 'objects' );
 	}
 
 	/**
-	 * @param \EDD_Payment $oPayment
+	 * @param \EDD_Payment $pym
 	 * @return int[]
 	 */
-	public function asIds( $oPayment ) {
-		return $this->retrieve( $oPayment, 'ids' );
+	public function asIds( $pym ) :array {
+		return $this->retrieve( $pym, 'ids' );
 	}
 
 	/**
-	 * @param \EDD_Payment $oPayment
-	 * @param string       $sToExtract
-	 * @return array
+	 * @param \EDD_Payment $pym
+	 * @param string       $toExtract
 	 */
-	public function retrieve( $oPayment, $sToExtract ) {
-		$aDownloads = [];
-		foreach ( $oPayment->downloads as $aDownload ) {
-			/** @var array $aDownload */
-			switch ( $sToExtract ) {
+	public function retrieve( $pym, $toExtract ) :array {
+		$downloads = [];
+		foreach ( $pym->downloads as $dln ) {
+			/** @var array $dln */
+			switch ( $toExtract ) {
 				case 'ids':
-					$mItem = $aDownload[ 'id' ];
+					$mItem = $dln[ 'id' ];
 					break;
 
 				case 'arrays':
-					$mItem = $aDownload;
+					$mItem = $dln;
 					break;
 
 				case 'objects':
 				default:
-					$mItem = new \EDD_Download( $aDownload[ 'id' ] );
+					$mItem = new \EDD_Download( $dln[ 'id' ] );
 					break;
 			}
-			$aDownloads[] = $mItem;
+			$downloads[] = $mItem;
 		}
-		return $aDownloads;
+		return $downloads;
 	}
 }

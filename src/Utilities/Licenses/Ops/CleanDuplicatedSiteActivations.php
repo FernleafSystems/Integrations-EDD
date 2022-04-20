@@ -13,7 +13,7 @@ class CleanDuplicatedSiteActivations {
 	use Consumers\EddCustomerConsumer;
 
 	public function clean() {
-		$oEDDSL = edd_software_licensing();
+		$eddSL = edd_software_licensing();
 
 		// For each URL, iterate over the activations to determine what state we're in
 		// i.e. how many activations do we have for the same URL for active licenses, and expired licenses.
@@ -32,7 +32,7 @@ class CleanDuplicatedSiteActivations {
 				// Since there is an active license with this URL, we remove the URL from all expired licenses.
 				if ( !empty( $expiredActs ) ) {
 					foreach ( $expiredActs as $oExpiredAct ) {
-						$lic = $oEDDSL->get_license( $oExpiredAct->license_id );
+						$lic = $eddSL->get_license( $oExpiredAct->license_id );
 						if ( $lic instanceof \EDD_SL_License ) {
 							error_log( sprintf( 'Unnecessary expired- remove %s from %s', $url, $oExpiredAct->license_id ) );
 							$lic->remove_site( $url );
@@ -46,14 +46,14 @@ class CleanDuplicatedSiteActivations {
 				 */
 				if ( count( $activeActs ) > 1 ) {
 					// leave only the most recent active
-					$oCurrent = $oEDDSL->get_license( array_pop( $activeActs )->license_id );
+					$current = $eddSL->get_license( array_pop( $activeActs )->license_id );
 					foreach ( $activeActs as $oActiveAct ) {
-						$lic = $oEDDSL->get_license( $oActiveAct->license_id );
+						$lic = $eddSL->get_license( $oActiveAct->license_id );
 						if ( $lic instanceof \EDD_SL_License && $lic->expiration > 0 ) {
-							if ( $lic->expiration > $oCurrent->expiration ) {
-								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $url, $oCurrent->ID ) );
-								$oCurrent->remove_site( $url );
-								$oCurrent = $lic;
+							if ( $lic->expiration > $current->expiration ) {
+								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $url, $current->ID ) );
+								$current->remove_site( $url );
+								$current = $lic;
 							}
 							else {
 								error_log( sprintf( 'Has Active, remove expired- remove %s from %s', $url, $lic->ID ) );
@@ -69,26 +69,25 @@ class CleanDuplicatedSiteActivations {
 	/**
 	 * @return EddActivationVO[][]
 	 */
-	private function getActivationsSortedBySite() {
+	private function getActivationsSortedBySite() :array {
 
 		$licIT = new LicensesIterator();
 		$licIT->filterByCustomer( $this->getEddCustomer()->id );
 
-		/** @var EddActivationVO[][] $activByURL */
-		$activByURL = [];
-		foreach ( $licIT as $oLic ) {
-			foreach ( ( new Retrieve() )->forLicense( $oLic ) as $oAct ) {
-				if ( !isset( $activByURL[ $oAct->site_name ] ) ) {
-					$activByURL[ $oAct->site_name ] = [];
+		/** @var EddActivationVO[][] $byURLs */
+		$byURLs = [];
+		foreach ( $licIT as $lic ) {
+			if ( !empty( $lic ) ) {
+				foreach ( ( new Retrieve() )->forLicense( $lic ) as $activation ) {
+					if ( !isset( $byURLs[ $activation->site_name ] ) ) {
+						$byURLs[ $activation->site_name ] = [];
+					}
+					$byURLs[ $activation->site_name ][] = $activation;
 				}
-				$activByURL[ $oAct->site_name ][] = $oAct;
 			}
 		}
 
 		// Keep only the URLs where their activation count is greater 1
-		return array_filter(
-			$activByURL,
-			fn( $aActs ) => count( $aActs ) > 1
-		);
+		return array_filter( $byURLs, fn( $activations ) => count( $activations ) > 1 );
 	}
 }
