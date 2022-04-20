@@ -11,9 +11,6 @@ class TransferActivationFromExpiredToActive {
 	use Consumers\EddCustomerConsumer;
 
 	/**
-	 * @param \EDD_SL_License $oldLicense
-	 * @param string          $url
-	 * @return \EDD_SL_License|null
 	 * @throws \LogicException
 	 */
 	public function transfer( \EDD_SL_License $oldLicense, string $url ) :?\EDD_SL_License {

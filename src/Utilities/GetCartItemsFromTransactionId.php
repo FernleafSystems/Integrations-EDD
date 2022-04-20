@@ -7,12 +7,12 @@ use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 class GetCartItemsFromTransactionId {
 
 	/**
-	 * @param string $sGatewayTxnId
+	 * @param string $taxID
 	 * @return CartItemVo[]
 	 * @throws \Exception
 	 * @deprecated
 	 */
-	public function retrieve( $sGatewayTxnId ) {
-		return ( new GetCartItemsFrom() )->transactionId( $sGatewayTxnId );
+	public function retrieve( $taxID ) {
+		return ( new GetCartItemsFrom() )->transactionId( $taxID );
 	}
 }
