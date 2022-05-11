@@ -38,7 +38,14 @@ class PaypalEddBridge extends PaypalBridge {
 		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $item->getPreTaxSubtotal() != $charge->amount_gross ) {
+		$sane = false;
+		foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
+			if ( (float)$price === (float)$charge->amount_gross ) {
+				$sane = true;
+				break;
+			}
+		}
+		if ( !$sane ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
