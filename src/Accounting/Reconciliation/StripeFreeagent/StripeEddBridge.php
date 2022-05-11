@@ -31,8 +31,7 @@ class StripeEddBridge extends StripeBridge {
 		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		$possibleAmounts = [ $charge->amount_gross, ( $charge->amount_gross - $charge->amount_discount ) ];
-		if ( !in_array( $item->price, $possibleAmounts ) ) {
+		if ( $item->getPreTaxSubtotal() != $charge->amount_gross ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
