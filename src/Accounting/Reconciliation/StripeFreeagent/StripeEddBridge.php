@@ -19,8 +19,8 @@ class StripeEddBridge extends StripeBridge {
 	 */
 	public function buildChargeFromTransaction( $txnID ) {
 		$charge = parent::buildChargeFromTransaction( $txnID );
-
 		$item = $this->getCartItemDetailsFromGatewayTxn( $txnID );
+		$charge->amount_discount = $item->discount ?? 0;
 
 		$period = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID )->period;
 		if ( empty( $period ) ) {
@@ -31,17 +31,19 @@ class StripeEddBridge extends StripeBridge {
 		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
 
 		// Sanity
-		if ( $item->price != $charge->getAmount_Gross() ) {
+		$possibleAmounts = [ $charge->amount_gross, ( $charge->amount_gross - $charge->amount_discount ) ];
+		if ( !in_array( $item->price, $possibleAmounts ) ) {
 			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
 		}
 
-		$charge->setItemName( $this->getCartItemName( $item ) )
-			   ->setItemPeriodType( $period )
-			   ->setItemQuantity( $item->quantity )
-			   ->setItemSubtotal( $item->getPreTaxPerItemSubtotal() )
-			   ->setItemTaxRate( $item->getTaxRate() )
-			   ->setLocalPaymentId( $this->getEddPaymentFromCharge( $charge )->ID );
+		$charge->item_name = $this->getCartItemName( $item );
+		$charge->item_quantity = $item->quantity;
+		$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
+		$charge->item_taxrate = $item->getTaxRate();
+		$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
+		$charge->setItemPeriodType( $period );
 		$this->setupChargeEcStatus( $charge );
+
 		return $charge;
 	}
 
