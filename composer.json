@@ -22,7 +22,8 @@
     "php":                                    ">=7.4",
     "fernleafsystems/integrations-freeagent": "^1.1",
     "fernleafsystems/wordpress-services":     "^2.10",
-    "ext-json":                               "*"
+    "ext-json":                               "*",
+    "ext-bcmath":                             "*"
   },
   "require-dev":       {
   },
