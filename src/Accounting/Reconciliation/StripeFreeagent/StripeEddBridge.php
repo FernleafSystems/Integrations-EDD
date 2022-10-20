@@ -33,13 +33,14 @@ class StripeEddBridge extends StripeBridge {
 		// Sanity
 		$sane = false;
 		foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
-			if ( (float)$price === (float)$charge->amount_gross ) {
+			if ( bccomp( (string)$price, (string)$charge->amount_gross )
+				 || (float)$price === (float)$charge->amount_gross ) {
 				$sane = true;
 				break;
 			}
 		}
 		if ( !$sane ) {
-			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
+			throw new \Exception( sprintf( 'Item cart total does not equal Stripe charge total for txn %s', $txnID ) );
 		}
 
 		$charge->item_name = $this->getCartItemName( $item );
