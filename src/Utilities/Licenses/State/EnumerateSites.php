@@ -10,18 +10,20 @@ class EnumerateSites extends BaseState {
 
 	protected function run() {
 
-		$aAssignedSites = [];
-		$aAssignedSitesExpired = [];
-		foreach ( $this->getLicIterator() as $oLicense ) {
-			if ( $oLicense->is_expired() == 'expired' ) {
-				$aAssignedSitesExpired = array_merge( $aAssignedSitesExpired, $oLicense->sites );
-			}
-			elseif ( in_array( $oLicense->status, [ 'active', 'inactive' ] ) ) {
-				$aAssignedSites = array_merge( $aAssignedSites, $oLicense->sites );
+		$assignedSites = [];
+		$assignedSitesExpired = [];
+		foreach ( $this->getLicIterator() as $licesnse ) {
+			if ( !empty( $licesnse ) ) {
+				if ( $licesnse->is_expired() == 'expired' ) {
+					$assignedSitesExpired = array_merge( $assignedSitesExpired, $licesnse->sites );
+				}
+				elseif ( in_array( $licesnse->status, [ 'active', 'inactive' ] ) ) {
+					$assignedSites = array_merge( $assignedSites, $licesnse->sites );
+				}
 			}
 		}
 
-		$this->sites = $aAssignedSites;
-		$this->sites_expired = $aAssignedSitesExpired;
+		$this->sites = $assignedSites;
+		$this->sites_expired = $assignedSitesExpired;
 	}
 }

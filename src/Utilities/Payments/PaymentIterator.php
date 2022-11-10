@@ -39,7 +39,7 @@ class PaymentIterator extends CommonEntityIterator {
 	 */
 	protected function getDefaultQueryFilters() {
 		$defs = parent::getDefaultQueryFilters();
-		$defs[ 'status' ] = 'all';
+		$defs[ 'status' ] = 'any';
 		return $defs;
 	}
 
