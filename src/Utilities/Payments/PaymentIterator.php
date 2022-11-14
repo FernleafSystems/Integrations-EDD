@@ -73,7 +73,7 @@ class PaymentIterator extends CommonEntityIterator {
 		if ( is_string( $stati ) ) {
 			$stati = array_map( 'trim', explode( ',', $stati ) );
 		}
-		if ( !in_array( 'all', $stati ) ) {
+		if ( !in_array( 'any', $stati ) ) {
 			$eddCounts = array_intersect_key( $eddCounts, array_flip( $stati ) );
 		}
 
