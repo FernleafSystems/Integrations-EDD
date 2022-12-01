@@ -4,6 +4,7 @@ namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
+use FernleafSystems\ApiWrappers\Freeagent\Entities\Common\Constants;
 use FernleafSystems\Integrations\Edd\Consumers\EddPaymentConsumer;
 use FernleafSystems\Integrations\Edd\Entities\CartItemVo;
 use FernleafSystems\Integrations\Edd\Utilities;
@@ -52,7 +53,7 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param bool         $updateOnly
+	 * @param bool $updateOnly
 	 * @return Entities\Contacts\ContactVO
 	 */
 	protected function createFreeagentContactFromPayment( \EDD_Payment $payment, $updateOnly = false ) {
@@ -86,15 +87,15 @@ trait CommonEddBridge {
 		$txnID = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $cartItem );
 		$charge = $this->buildChargeFromTransaction( $txnID );
 
-		$nInvoiceId = $this->getFreeagentInvoiceId( $charge );
+		$invoiceID = $this->getFreeagentInvoiceId( $charge );
 
-		if ( !empty( $nInvoiceId ) ) {
+		if ( !empty( $invoiceID ) ) {
 			$inv = ( new Entities\Invoices\Retrieve() )
 				->setConnection( $this->getConnection() )
-				->setEntityId( $nInvoiceId )
+				->setEntityId( $invoiceID )
 				->retrieve();
 		}
-		if ( empty( $nInvoiceId ) || empty( $inv ) ) {
+		if ( empty( $invoiceID ) || empty( $inv ) ) {
 			$inv = ( new CreateFromCharge() )
 				->setBridge( $this )
 				->setConnection( $this->getConnection() )
@@ -104,7 +105,7 @@ trait CommonEddBridge {
 		}
 
 		if ( !empty( $inv ) && $inv->isStatusDraft() ) {
-			sleep( 10 );
+			sleep( 15 );
 			( new Entities\Invoices\MarkAs() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $inv->getId() )
@@ -125,9 +126,7 @@ trait CommonEddBridge {
 	 */
 	public function createFreeagentInvoicesFromEddPayment( $payment ) {
 		return array_filter( array_map(
-			function ( $txnID ) {
-				return $this->createFreeagentInvoiceFromChargeId( $txnID );
-			},
+			fn( $txnID ) => $this->createFreeagentInvoiceFromChargeId( $txnID ),
 			( new Utilities\GetTransactionIdsFromPayment() )->retrieve( $payment )
 		) );
 	}
@@ -154,11 +153,10 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param \EDD_Payment $oEddPayment
-	 * @return \EDD_Customer
+	 * @param \EDD_Payment $eddPayment
 	 */
-	protected function getEddCustomerFromEddPayment( $oEddPayment ) {
-		return new \EDD_Customer( $oEddPayment->customer_id );
+	protected function getEddCustomerFromEddPayment( $eddPayment ) :\EDD_Customer {
+		return new \EDD_Customer( $eddPayment->customer_id );
 	}
 
 	/**
@@ -170,30 +168,26 @@ trait CommonEddBridge {
 	}
 
 	/**
-	 * @param \EDD_Payment $oEddPayment
+	 * @param \EDD_Payment $eddPayment
 	 * @return int
 	 */
-	public function getFreeagentContactIdFromEddPayment( $oEddPayment ) {
+	public function getFreeagentContactIdFromEddPayment( $eddPayment ) {
 		return $this->getFreeagentContactIdFromCustomer(
-			$this->getEddCustomerFromEddPayment( $oEddPayment )
+			$this->getEddCustomerFromEddPayment( $eddPayment )
 		);
 	}
 
-	/**
-	 * @param \EDD_Customer $oCustomer
-	 * @return int
-	 */
-	public function getFreeagentContactIdFromCustomer( $oCustomer ) {
-		return $oCustomer->get_meta( 'freeagent_contact_id' );
+	public function getFreeagentContactIdFromCustomer( \EDD_Customer $customer ) :int {
+		return (int)$customer->get_meta( 'freeagent_contact_id' );
 	}
 
 	/**
 	 * @param \EDD_Payment $payment
 	 * @return array
 	 */
-	public function getFreeagentInvoiceIdsFromEddPayment( $payment ) {
-		$aIds = $payment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
-		return is_array( $aIds ) ? $aIds : [];
+	public function getFreeagentInvoiceIdsFromEddPayment( $payment ) :array {
+		$IDs = $payment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
+		return is_array( $IDs ) ? $IDs : [];
 	}
 
 	/**
@@ -236,9 +230,7 @@ trait CommonEddBridge {
 	}
 
 	protected function isChargeInEcRegion( ChargeVO $charge ) :bool {
-		$country = $this->getChargeCountry( $charge );
-		return $country != 'GB' &&
-			   array_key_exists( $country, $this->getTaxCountriesRates() );
+		return in_array( $this->getChargeCountry( $charge ), Utilities\Countries::EC_COUNTRIES );
 	}
 
 	protected function getTaxCountriesRates() :array {
@@ -252,13 +244,9 @@ trait CommonEddBridge {
 	}
 
 	protected function setupChargeEcStatus( ChargeVO $charge ) {
-		if ( $this->isChargeInEcRegion( $charge ) ) {
-			$vatNumber = $this->getVatNumber( $charge );
-			// TODO: Check country is the same as the VAT country code??
-			$charge->ec_status = empty( $vatNumber ) ? 'EC VAT MOSS' : 'EC Services';
-		}
-		else {
-			$charge->ec_status = 'UK/Non-EC';
-		}
+		$hasVatNumber = !empty( $this->getVatNumber( $charge ) );
+		$charge->ec_status = $this->isChargeInEcRegion( $charge ) ?
+			( $hasVatNumber ? Constants::VAT_STATUS_REVERSE_CHARGE : Constants::VAT_STATUS_EC_MOSS )
+			: Constants::VAT_STATUS_UK_NON_EC;
 	}
 }
