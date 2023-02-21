@@ -9,7 +9,7 @@ use FernleafSystems\Integrations\Edd\Utilities\Base\CommonEntityIterator;
  */
 class PaymentIterator extends CommonEntityIterator {
 
-	const PAGINATION_TYPE = 'page';
+	public const PAGINATION_TYPE = 'page';
 
 	/**
 	 * @return \EDD_Payment|null
@@ -20,24 +20,19 @@ class PaymentIterator extends CommonEntityIterator {
 
 	/**
 	 * @param int $customerID
-	 * @return $this
 	 */
-	public function filterByCustomer( $customerID ) {
+	public function filterByCustomer( $customerID ) :self {
 		return $this->setCustomQueryFilter( 'customer', $customerID );
 	}
 
 	/**
 	 * @param string|array $status
-	 * @return $this
 	 */
-	public function filterByStatus( $status ) {
+	public function filterByStatus( $status ) :self {
 		return $this->setCustomQueryFilter( 'status', $status );
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function getDefaultQueryFilters() {
+	protected function getDefaultQueryFilters() :array {
 		$defs = parent::getDefaultQueryFilters();
 		$defs[ 'status' ] = 'any';
 		return $defs;
@@ -46,7 +41,7 @@ class PaymentIterator extends CommonEntityIterator {
 	/**
 	 * @return \EDD_Payment[]
 	 */
-	protected function runQuery() {
+	protected function runQuery() :array {
 		return ( new \EDD_Payments_Query( $this->getFinalQueryFilters() ) )->get_payments();
 	}
 
@@ -55,7 +50,7 @@ class PaymentIterator extends CommonEntityIterator {
 	 * and the parameters and structure is different.
 	 * @return int
 	 */
-	protected function runQueryCount() {
+	protected function runQueryCount() :int {
 		$filters = $this->getFinalQueryFilters();
 		if ( isset( $filters[ 'start_date' ] ) ) {
 			$filters[ 'start-date' ] = date( 'm/d/Y', $filters[ 'start_date' ] );

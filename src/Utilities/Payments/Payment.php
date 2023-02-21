@@ -10,7 +10,7 @@ class Payment {
 	public const STATUS_NORMAL_ORDER_LEGACY = 'publish';
 	public const STATUS_PENDING = 'pending';
 	public const STATUS_RENEWAL = 'edd_subscription';
-	public const STATUS_REFUND_FULL = 'edd_subscription';
+	public const STATUS_REFUND_FULL = 'refunded';
 	public const STATUS_REFUND_PARTIAL = 'partially_refunded';
 	public const STATUS_REVOKED = 'revoked';
 

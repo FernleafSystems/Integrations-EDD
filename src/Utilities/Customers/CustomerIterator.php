@@ -19,19 +19,16 @@ class CustomerIterator extends CommonEntityIterator {
 	/**
 	 * @return \EDD_Customer[]
 	 */
-	protected function runQuery() {
+	protected function runQuery() :array {
 		return array_map(
-			function ( $oStdClass ) {
-				return new \EDD_Customer( $oStdClass->id );
+			function ( $stdClass ) {
+				return new \EDD_Customer( $stdClass->id );
 			},
 			( new \EDD_Customer_Query() )->query( $this->getFinalQueryFilters() )
 		);
 	}
 
-	/**
-	 * @return int
-	 */
-	protected function runQueryCount() {
+	protected function runQueryCount() :int {
 		return ( new \EDD_Customer_Query() )->query( [ 'count' => true ] );
 	}
 }
