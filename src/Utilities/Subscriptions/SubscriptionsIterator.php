@@ -18,39 +18,33 @@ class SubscriptionsIterator extends CommonEntityIterator {
 
 	/**
 	 * @param int|array $customerID
-	 * @return $this
 	 */
-	public function filterByCustomer( $customerID ) {
+	public function filterByCustomer( $customerID ) :self {
 		return $this->setCustomQueryFilter( 'customer_id', $customerID );
 	}
 
 	/**
-	 * @param int|array $sId
-	 * @return $this
+	 * @param int|array $ID
 	 */
-	public function filterByProductId( $sId ) {
-		return $this->setCustomQueryFilter( 'product_id', $sId );
+	public function filterByProductId( $ID ) :self {
+		return $this->setCustomQueryFilter( 'product_id', $ID );
 	}
 
 	/**
-	 * @param string|array $sStatus
-	 * @return $this
+	 * @param string|array $status
 	 */
-	public function filterByStatus( $sStatus ) {
-		return $this->setCustomQueryFilter( 'status', $sStatus );
+	public function filterByStatus( $status ) :self {
+		return $this->setCustomQueryFilter( 'status', $status );
 	}
 
 	/**
 	 * @return \EDD_Subscription[]
 	 */
-	protected function runQuery() {
+	protected function runQuery() :array {
 		return ( new \EDD_Subscriptions_DB() )->get_subscriptions( $this->getFinalQueryFilters() );
 	}
 
-	/**
-	 * @return int
-	 */
-	protected function runQueryCount() {
+	protected function runQueryCount() :int {
 		return ( new \EDD_Subscriptions_DB() )->count( $this->getCustomQueryFilters() );
 	}
 }

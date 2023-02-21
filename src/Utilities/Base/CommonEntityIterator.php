@@ -6,30 +6,21 @@ use Elliotchance\Iterator\AbstractPagedIterator;
 
 abstract class CommonEntityIterator extends AbstractPagedIterator {
 
-	const PAGE_LIMIT = 50;
-	const PAGINATION_TYPE = 'offset';
+	public const PAGE_LIMIT = 50;
+	public const PAGINATION_TYPE = 'offset';
 
-	/**
-	 * @var int
-	 */
-	private $nTotalSize;
+	private ?int $totalSize = null;
 
 	/**
 	 * @var array
 	 */
-	private $aQueryFilters;
+	private $queryFilters;
 
-	/**
-	 * @return array
-	 */
-	public function getCustomQueryFilters() {
-		return is_array( $this->aQueryFilters ) ? $this->aQueryFilters : [];
+	public function getCustomQueryFilters() :array {
+		return is_array( $this->queryFilters ) ? $this->queryFilters : [];
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function getDefaultQueryFilters() {
+	protected function getDefaultQueryFilters() :array {
 		return [
 			'orderby' => 'ID',
 			'order'   => 'ASC',
@@ -37,89 +28,63 @@ abstract class CommonEntityIterator extends AbstractPagedIterator {
 		];
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function getFinalQueryFilters() {
+	protected function getFinalQueryFilters() :array {
 		return array_merge( $this->getDefaultQueryFilters(), $this->getCustomQueryFilters() );
 	}
 
 	/**
-	 * @param int $nPage - always starts at 0
-	 * @return array
+	 * @param int $page - always starts at 0
 	 */
-	public function getPage( $nPage ) {
+	public function getPage( $page ) :array {
 
 		switch ( static::PAGINATION_TYPE ) {
 			case 'offset':
-				$this->setCustomQueryFilter( 'offset', $nPage*$this->getPageSize() );
+				$this->setCustomQueryFilter( 'offset', $page*$this->getPageSize() );
 				break;
 
 			case 'page':
 			default:
-				$this->setCustomQueryFilter( 'page', $nPage + 1 );
+				$this->setCustomQueryFilter( 'page', $page + 1 );
 				break;
 		}
 
 		return $this->runQuery();
 	}
 
-	/**
-	 * @param array $aQuery
-	 * @return $this
-	 */
-	public function setCustomQueryFilters( $aQuery ) {
-		if ( is_array( $aQuery ) ) {
-			if ( isset( $aQuery[ 'number' ] ) && (int)$aQuery[ 'number' ] < 0 ) {
-				unset( $aQuery[ 'number' ] );
-			}
-			$this->aQueryFilters = $aQuery;
+	public function setCustomQueryFilters( array $query ) :self {
+		if ( isset( $query[ 'number' ] ) && (int)$query[ 'number' ] < 0 ) {
+			unset( $query[ 'number' ] );
 		}
+		$this->queryFilters = $query;
 		return $this;
 	}
 
 	/**
-	 * @param string $sKey
-	 * @param mixed  $mValue
-	 * @return $this
+	 * @param mixed $value
 	 */
-	public function setCustomQueryFilter( $sKey, $mValue ) {
-		$aQ = $this->getCustomQueryFilters();
-		$aQ[ $sKey ] = $mValue;
-		return $this->setCustomQueryFilters( $aQ );
+	public function setCustomQueryFilter( string $key, $value ) :self {
+		$q = $this->getCustomQueryFilters();
+		$q[ $key ] = $value;
+		return $this->setCustomQueryFilters( $q );
 	}
 
 	/**
-	 * @return integer
+	 * @return int
 	 */
 	public function getPageSize() {
 		return static::PAGE_LIMIT;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getTotalSize() {
-		if ( !isset( $this->nTotalSize ) ) {
-			$this->nTotalSize = $this->runQueryCount();
-		}
-		return $this->nTotalSize;
+		return is_null( $this->totalSize ) ? $this->totalSize = $this->runQueryCount() : $this->totalSize;
 	}
 
-	/**
-	 * @return array
-	 */
-	abstract protected function runQuery();
+	abstract protected function runQuery() :array;
 
-	/**
-	 * @return int
-	 */
-	abstract protected function runQueryCount();
+	abstract protected function runQueryCount() :int;
 
-	/**
-	 */
 	public function rewind() {
 		parent::rewind();
-		unset( $this->nTotalSize );
+		$this->totalSize = null;
 	}
 }

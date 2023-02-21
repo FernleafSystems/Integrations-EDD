@@ -5,51 +5,50 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Customers;
 class RetrieveAll {
 
 	/**
-	 * @param array $aQueryOptions
 	 * @return \EDD_Customer[]
 	 */
-	public function retrieve( $aQueryOptions = [] ) {
-		$aAll = [];
+	public function retrieve( array $queryOptions = [] ) :array {
+		$all = [];
 
-		$nPerPage = 20; // default anyway
-		if ( isset( $aQueryOptions[ 'per_page' ] ) ) {
-			$nPerPage = $aQueryOptions[ 'per_page' ];
-			unset( $aQueryOptions[ 'per_page' ] );
+		$perPage = 20; // default anyway
+		if ( isset( $queryOptions[ 'per_page' ] ) ) {
+			$perPage = $queryOptions[ 'per_page' ];
+			unset( $queryOptions[ 'per_page' ] );
 		}
 
-		$aQueryOptions = array_merge(
+		$queryOptions = array_merge(
 			[
 				'orderby' => 'id',
 				'order'   => 'ASC',
-				'number'  => $nPerPage,
+				'number'  => $perPage,
 				'offset'  => 0,
 			],
-			$aQueryOptions
+			$queryOptions
 		);
 
-		$nPage = 0;
+		$currentPage = 0;
 		do {
-			$aQueryOptions = array_merge(
-				$aQueryOptions,
+			$queryOptions = array_merge(
+				$queryOptions,
 				[
-					'offset' => $nPage*$nPerPage,
+					'offset' => $currentPage*$perPage,
 				]
 			);
 
-			$nCountBefore = count( $aAll );
-			$aAll = array_merge(
-				$aAll,
+			$countBefore = count( $all );
+			$all = array_merge(
+				$all,
 				array_map(
-					function ( $oCustomerStdClass ) {
-						return new \EDD_Customer( $oCustomerStdClass->id );
+					function ( $customerStdClass ) {
+						return new \EDD_Customer( $customerStdClass->id );
 					},
-					( new \EDD_Customer_Query() )->query( $aQueryOptions )
+					( new \EDD_Customer_Query() )->query( $queryOptions )
 				)
 			);
 
-			$nPage++;
-		} while ( $nCountBefore != count( $aAll ) );
+			$currentPage++;
+		} while ( $countBefore != count( $all ) );
 
-		return $aAll;
+		return $all;
 	}
 }
