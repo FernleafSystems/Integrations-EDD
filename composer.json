@@ -20,7 +20,7 @@
   ],
   "require":           {
     "php":                                    ">=7.4",
-    "fernleafsystems/integrations-freeagent": "^2.0",
+    "fernleafsystems/integrations-freeagent": "^2.1",
     "fernleafsystems/wordpress-services":     "^3.0",
     "ext-json":                               "*",
     "ext-bcmath":                             "*"
@@ -32,6 +32,11 @@
   "autoload":          {
     "psr-4": {
       "FernleafSystems\\Integrations\\Edd\\": "src"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "kylekatarnls/update-helper": false
     }
   }
 }

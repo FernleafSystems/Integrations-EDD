@@ -1,27 +1,17 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
 trait EddSlLicenseConsumer {
 
-	/**
-	 * @var \EDD_SL_License
-	 */
-	private $oEddSlLicense;
+	private ?\EDD_SL_License $eddSlLicense;
 
-	/**
-	 * @return \EDD_SL_License
-	 */
-	public function getEddSlLicense() {
-		return $this->oEddSlLicense;
+	public function getEddSlLicense() :?\EDD_SL_License {
+		return $this->eddSlLicense;
 	}
 
-	/**
-	 * @param \EDD_SL_License $oEddSlLicense
-	 * @return $this
-	 */
-	public function setEddSlLicense( $oEddSlLicense ) {
-		$this->oEddSlLicense = $oEddSlLicense;
+	public function setEddSlLicense( \EDD_SL_License $eddSlLicense ) :self {
+		$this->eddSlLicense = $eddSlLicense;
 		return $this;
 	}
 }

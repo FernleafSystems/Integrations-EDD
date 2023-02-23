@@ -15,8 +15,6 @@ class LocateViableLicense {
 	 *
 	 * Will attempt to locate a URL attached to an expired license and then try to
 	 * add this site to an available active license.
-	 * @param string $url
-	 * @return \EDD_SL_License|null
 	 */
 	public function locate( string $url ) :?\EDD_SL_License {
 		$licHome = null;

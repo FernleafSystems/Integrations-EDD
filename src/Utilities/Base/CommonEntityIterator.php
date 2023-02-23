@@ -11,13 +11,10 @@ abstract class CommonEntityIterator extends AbstractPagedIterator {
 
 	private ?int $totalSize = null;
 
-	/**
-	 * @var array
-	 */
-	private $queryFilters;
+	private array $queryFilters = [];
 
 	public function getCustomQueryFilters() :array {
-		return is_array( $this->queryFilters ) ? $this->queryFilters : [];
+		return $this->queryFilters;
 	}
 
 	protected function getDefaultQueryFilters() :array {
@@ -33,18 +30,18 @@ abstract class CommonEntityIterator extends AbstractPagedIterator {
 	}
 
 	/**
-	 * @param int $page - always starts at 0
+	 * @param int $pageNumber - always starts at 0
 	 */
-	public function getPage( $page ) :array {
+	public function getPage( $pageNumber ) :array {
 
 		switch ( static::PAGINATION_TYPE ) {
 			case 'offset':
-				$this->setCustomQueryFilter( 'offset', $page*$this->getPageSize() );
+				$this->setCustomQueryFilter( 'offset', $pageNumber*$this->getPageSize() );
 				break;
 
 			case 'page':
 			default:
-				$this->setCustomQueryFilter( 'page', $page + 1 );
+				$this->setCustomQueryFilter( 'page', $pageNumber + 1 );
 				break;
 		}
 
@@ -86,5 +83,10 @@ abstract class CommonEntityIterator extends AbstractPagedIterator {
 	public function rewind() {
 		parent::rewind();
 		$this->totalSize = null;
+	}
+
+	public function setUseCache( bool $useCache = false ) :self {
+		$this->useCache = $useCache;
+		return $this;
 	}
 }

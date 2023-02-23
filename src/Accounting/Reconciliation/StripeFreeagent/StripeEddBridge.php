@@ -1,31 +1,26 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\StripeFreeagent;
 
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
 use FernleafSystems\Integrations\Edd\Utilities\GetSubscriptionsFromGatewayTxnId;
-use FernleafSystems\Integrations\Freeagent\DataWrapper;
+use FernleafSystems\Integrations\Freeagent\DataWrapper\ChargeVO;
 use FernleafSystems\Integrations\Freeagent\Service\Stripe\StripeBridge;
 
 class StripeEddBridge extends StripeBridge {
 
 	use CommonEddBridge;
 
-	/**
-	 * @param string $txnID a stripe txn ID
-	 * @return DataWrapper\ChargeVO
-	 * @throws \Exception
-	 */
-	public function buildChargeFromTransaction( $txnID ) {
-		$charge = parent::buildChargeFromTransaction( $txnID );
-		$item = $this->getCartItemDetailsFromGatewayTxn( $txnID );
+	public function buildChargeFromTransaction( string $gatewayChargeID ) :ChargeVO {
+		$charge = parent::buildChargeFromTransaction( $gatewayChargeID );
+		$item = $this->getCartItemDetailsFromGatewayTxn( $gatewayChargeID );
 		$charge->amount_discount = $item->discount ?? 0;
 
-		$period = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID )->period;
+		$period = ( new GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayChargeID )->period;
 		if ( empty( $period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
-			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $gatewayChargeID ) );
 			$period = 'year';
 		}
 		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
@@ -40,7 +35,7 @@ class StripeEddBridge extends StripeBridge {
 			}
 		}
 		if ( !$sane ) {
-			throw new \Exception( sprintf( 'Item cart total does not equal Stripe charge total for txn %s', $txnID ) );
+			throw new \Exception( sprintf( 'Item cart total does not equal Stripe charge total for txn %s', $gatewayChargeID ) );
 		}
 
 		$charge->item_name = $this->getCartItemName( $item );
@@ -52,13 +47,5 @@ class StripeEddBridge extends StripeBridge {
 		$this->setupChargeEcStatus( $charge );
 
 		return $charge;
-	}
-
-	/**
-	 * @param string $sPayoutId
-	 * @return DataWrapper\PayoutVO
-	 */
-	public function buildPayoutFromId( $sPayoutId ) {
-		return parent::buildPayoutFromId( $sPayoutId );
 	}
 }

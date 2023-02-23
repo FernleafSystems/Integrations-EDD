@@ -4,34 +4,25 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses;
 
 class Find extends Retrieve {
 
-	/**
-	 * @return \EDD_SL_License|null
-	 */
-	public function withActivationSlot() {
-		$oTheLicense = null;
+	public function withActivationSlot() :?\EDD_SL_License {
+		$theLicense = null;
 		foreach ( $this->retrieve() as $lic ) {
 			if ( !$lic->is_expired() ) {
-				$nLimit = $lic->activation_limit; // 0 == unlimited
-				if ( $nLimit <= 0 || $nLimit > $lic->activation_count ) {
-					$oTheLicense = $lic;
+				if ( $lic->activation_limit <= 0 || $lic->activation_limit > $lic->activation_count ) {
+					$theLicense = $lic;
 					break;
 				}
 			}
 		}
-		return $oTheLicense;
+		return $theLicense;
 	}
 
-	/**
-	 * @param string $url
-	 * @param bool   $includeExpired
-	 * @return \EDD_SL_License|null
-	 */
-	public function withActiveSite( $url, $includeExpired = false ) {
+	public function withActiveSite( string $url, bool $includeExpired = false ) :?\EDD_SL_License {
 		$theLicense = null;
 
-		$aLicensesBySite = $this->retrieve( [ 'site_name' => $url ] );
-		if ( !empty( $aLicensesBySite ) ) {
-			foreach ( $aLicensesBySite as $lic ) {
+		$licensesBySite = $this->retrieve( [ 'site_name' => $url ] );
+		if ( !empty( $licensesBySite ) ) {
+			foreach ( $licensesBySite as $lic ) {
 				if ( ( $includeExpired || !$lic->is_expired() ) && in_array( $url, $lic->sites ) ) {
 					$theLicense = $lic;
 					break;
@@ -40,14 +31,5 @@ class Find extends Retrieve {
 		}
 
 		return $theLicense;
-	}
-
-	/**
-	 * @param string $sUrl
-	 * @return \EDD_SL_License[]
-	 * @deprecated unused
-	 */
-	public function withActiveSiteUsingMetaQuery( $sUrl ) {
-		return $this->retrieve( [ 'site_name' => $sUrl ] );
 	}
 }

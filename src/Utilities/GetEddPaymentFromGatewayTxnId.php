@@ -4,11 +4,7 @@ namespace FernleafSystems\Integrations\Edd\Utilities;
 
 class GetEddPaymentFromGatewayTxnId {
 
-	/**
-	 * @param string $txnID
-	 * @return \EDD_Payment|null
-	 */
-	public function retrieve( $txnID ) {
+	public function retrieve( string $txnID ) :?\EDD_Payment {
 		$payment = null;
 
 		$pID = edd_get_purchase_id_by_transaction_id( $txnID );

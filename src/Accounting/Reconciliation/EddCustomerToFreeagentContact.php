@@ -3,7 +3,14 @@
 namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation;
 
 use FernleafSystems\ApiWrappers\Base\ConnectionConsumer;
-use FernleafSystems\ApiWrappers\Freeagent\Entities;
+use FernleafSystems\ApiWrappers\Freeagent\Entities\Contacts\{
+	ContactVO,
+	Create,
+	Retrieve,
+	Update
+};
+use FernleafSystems\Integrations\Edd\Consumers\EddPaymentConsumer;
+use FernleafSystems\Integrations\Edd\Utilities\VAT;
 
 /**
  * TODO: Abstract this whole thing into the Freeagent Integration Bridge
@@ -11,36 +18,42 @@ use FernleafSystems\ApiWrappers\Freeagent\Entities;
 class EddCustomerToFreeagentContact {
 
 	use ConnectionConsumer;
+	use EddPaymentConsumer;
 
-	const KEY_FREEAGENT_CONTACT_ID = 'freeagent_contact_id';
+	public const KEY_FREEAGENT_CONTACT_ID = 'freeagent_contact_id';
 
-	/**
-	 * @var Entities\Contacts\ContactVO
-	 */
-	private $contact;
+	private ?ContactVO $contact = null;
 
-	/**
-	 * @var \EDD_Customer
-	 */
-	private $customer;
-
-	/**
-	 * @var \EDD_Payment
-	 */
-	private $payment;
+	private ?\EDD_Payment $payment;
 
 	/**
 	 * @throws \Exception
 	 */
-	public function create( bool $updateFromPayment = true ) :Entities\Contacts\ContactVO {
+	public function create( bool $updateFromPayment = true ) :ContactVO {
+		$customer = $this->getCustomer();
 
 		// If there is no link between Customer and Contact, create it.
-		$contactID = $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID );
+		$contactID = $customer->get_meta( self::KEY_FREEAGENT_CONTACT_ID );
 		if ( empty( $contactID ) ) {
-			$id = $this->createNewFreeagentContact();
-			if ( empty( $id ) ) {
+
+			$customer = $this->getCustomer();
+			$names = explode( ' ', $customer->name, 2 );
+			if ( empty( $names[ 1 ] ) ) {
+				$names[ 1 ] = 'Surname-Unknown';
+			}
+
+			$contact = ( new Create() )
+				->setConnection( $this->getConnection() )
+				->setFirstName( $names[ 0 ] )
+				->setLastName( $names[ 1 ] )
+				->setEmail( $customer->email )
+				->create();
+
+			if ( empty( $contact ) || empty( $contact->getId() ) ) {
 				throw new \Exception( 'Failed to create new Freeagent contact' );
 			}
+
+			$customer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $contact->getId() );
 		}
 
 		if ( $updateFromPayment ) {
@@ -50,75 +63,48 @@ class EddCustomerToFreeagentContact {
 		return $this->getContact();
 	}
 
-	public function update() :Entities\Contacts\ContactVO {
-		return $this->create();
-	}
-
-	protected function createNewFreeagentContact() :string {
-		$customer = $this->getCustomer();
-		$names = explode( ' ', $customer->name, 2 );
-		if ( empty( $names[ 1 ] ) ) {
-			$names[ 1 ] = 'Surname-Unknown';
-		}
-
-		$contact = ( new Entities\Contacts\Create() )
-			->setConnection( $this->getConnection() )
-			->setFirstName( $names[ 0 ] )
-			->setLastName( $names[ 1 ] )
-			->setEmail( $customer->email )
-			->create();
-
-		$customer->update_meta( self::KEY_FREEAGENT_CONTACT_ID, $contact->getId() );
-
-		return (string)$contact->getId();
-	}
-
 	/**
 	 * @return $this
 	 */
 	protected function updateContactUsingPaymentInfo() {
-		$pymt = $this->getPayment();
-
-		// Freeagent uses full country names; EDD uses ISO2 codes
-		$paymentCountry = $this->getCountryNameFromIso2Code( $pymt->address[ 'country' ] );
-		$userInfo = edd_get_payment_meta_user_info( $pymt->ID );
+		$p = $this->getEddPayment();
 
 		$originalContact = $this->getContact();
+		$userInfo = edd_get_payment_meta_user_info( $p->ID );
 
-		$contact = ( new Entities\Contacts\Update() )
-			->setFirstName( $originalContact->first_name )
-			->setLastName( $originalContact->last_name )
+		$contact = ( new Update() )
 			->setConnection( $this->getConnection() )
 			->setEntityId( $this->getContact()->getId() )
-			->setEmail( $pymt->email )
+			->setFirstName( $originalContact->first_name )
+			->setLastName( $originalContact->last_name )
+			->setEmail( $p->email )
 			->setAddress_Line( $userInfo[ 'line1' ] ?? '', 1 )
 			->setAddress_Line( $userInfo[ 'line2' ] ?? '', 2 )
 			->setAddress_Town( $userInfo[ 'city' ] ?? '' )
 			->setAddress_Region( $userInfo[ 'state' ] ?? '' )
 			->setAddress_PostalCode( $userInfo[ 'zip' ] ?? '' )
-			->setAddress_Country( $paymentCountry )
-			->setSalesTaxNumber( $userInfo[ 'vat_number' ] ?? '' )
-			->setOrganisationName( $userInfo[ 'company' ] ?? '' )
+			->setAddress_Country( $this->getCountryNameFromIso2Code( (string)$p->address[ 'country' ] ) )
+			->setSalesTaxNumber( VAT::VatNumberFromPayment( $p ) )
+			->setOrganisationName( $p->get_meta( VAT::META_META_VAT_COMPANY ) )
 			->setUseContactLevelInvoiceSequence( true )
-			->setStatus( 'Active' )
+			->setStatus( ContactVO::STATUS_ACTIVE )
 			->update();
 
-		return $this->setContact( $contact );
+		return $this->contact = $contact;
 	}
 
 	/**
-	 * @param string $code
-	 * @return string
+	 * Freeagent uses full country names; EDD uses ISO2 codes
 	 */
-	protected function getCountryNameFromIso2Code( $code ) {
+	protected function getCountryNameFromIso2Code( string $code ) :string {
 		$countries = edd_get_country_list();
 		$countries[ 'HR' ] = 'Croatia'; // bug when country name is Croatia/Hrvatska and FreeAgent doesn't understand
 		return $countries[ $code ] ?? $code;
 	}
 
-	protected function getContact() :?Entities\Contacts\ContactVO {
-		if ( !isset( $this->contact ) ) {
-			$contact = ( new Entities\Contacts\Retrieve() )
+	protected function getContact() :?ContactVO {
+		if ( $this->contact === null ) {
+			$contact = ( new Retrieve() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $this->getCustomer()->get_meta( self::KEY_FREEAGENT_CONTACT_ID ) )
 				->retrieve();
@@ -130,25 +116,11 @@ class EddCustomerToFreeagentContact {
 	}
 
 	public function getCustomer() :?\EDD_Customer {
-		return $this->customer;
+		return edd_get_customer( $this->getEddPayment()->customer_id );
 	}
 
-	public function getPayment() :?\EDD_Payment {
-		return $this->payment;
-	}
-
-	public function setContact( Entities\Contacts\ContactVO $contact ) :self {
+	public function setContact( ContactVO $contact ) :self {
 		$this->contact = $contact;
-		return $this;
-	}
-
-	public function setCustomer( \EDD_Customer $customer ) :self {
-		$this->customer = $customer;
-		return $this;
-	}
-
-	public function setPayment( \EDD_Payment $payment ) :self {
-		$this->payment = $payment;
 		return $this;
 	}
 }

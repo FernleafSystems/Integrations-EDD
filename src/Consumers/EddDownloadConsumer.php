@@ -1,27 +1,17 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
 trait EddDownloadConsumer {
 
-	/**
-	 * @var \EDD_Download
-	 */
-	private $oEddDownload;
+	private ?\EDD_Download $eddDownload = null;
 
-	/**
-	 * @return \EDD_Download
-	 */
-	public function getEddDownload() {
-		return $this->oEddDownload;
+	public function getEddDownload() :?\EDD_Download {
+		return $this->eddDownload;
 	}
 
-	/**
-	 * @param \EDD_Download $oEddDownload
-	 * @return $this
-	 */
-	public function setEddDownload( $oEddDownload ) {
-		$this->oEddDownload = $oEddDownload;
+	public function setEddDownload( \EDD_Download $eddDownload ) :self {
+		$this->eddDownload = $eddDownload;
 		return $this;
 	}
 }
