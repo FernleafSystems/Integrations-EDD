@@ -10,7 +10,7 @@ trait EddDownloadConsumer {
 		return $this->eddDownload;
 	}
 
-	public function setEddDownload( \EDD_Download $eddDownload ) :self {
+	public function setEddDownload( ?\EDD_Download $eddDownload ) :self {
 		$this->eddDownload = $eddDownload;
 		return $this;
 	}

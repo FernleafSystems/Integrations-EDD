@@ -4,13 +4,13 @@ namespace FernleafSystems\Integrations\Edd\Consumers;
 
 trait EddSlLicenseConsumer {
 
-	private ?\EDD_SL_License $eddSlLicense;
+	private ?\EDD_SL_License $eddSlLicense = null;
 
 	public function getEddSlLicense() :?\EDD_SL_License {
 		return $this->eddSlLicense;
 	}
 
-	public function setEddSlLicense( \EDD_SL_License $eddSlLicense ) :self {
+	public function setEddSlLicense( ?\EDD_SL_License $eddSlLicense ) :self {
 		$this->eddSlLicense = $eddSlLicense;
 		return $this;
 	}

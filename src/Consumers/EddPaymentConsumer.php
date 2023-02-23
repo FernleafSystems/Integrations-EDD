@@ -10,7 +10,7 @@ trait EddPaymentConsumer {
 		return $this->eddPayment;
 	}
 
-	public function setEddPayment( \EDD_Payment $payment ) :self {
+	public function setEddPayment( ?\EDD_Payment $payment ) :self {
 		$this->eddPayment = $payment;
 		return $this;
 	}
