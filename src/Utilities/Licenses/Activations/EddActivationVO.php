@@ -1,8 +1,8 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Activations;
 
-use FernleafSystems\Utilities\Data\Adapter\StdClassAdapter;
+use FernleafSystems\Utilities\Data\Adapter\DynPropertiesClass;
 
 /**
  * @property int    $site_id
@@ -12,26 +12,18 @@ use FernleafSystems\Utilities\Data\Adapter\StdClassAdapter;
  * @property int    $is_local
  * @property bool   $lic_expired - dynamic
  */
-class EddActivationVO {
+class EddActivationVO extends DynPropertiesClass {
 
-	use StdClassAdapter {
-		__get as __adapterGet;
-	}
+	public function __get( string $key ) {
 
-	/**
-	 * @param string $sProperty
-	 * @return mixed
-	 */
-	public function __get( $sProperty ) {
+		$value = parent::__get( $key );
 
-		$mVal = $this->__adapterGet( $sProperty );
-
-		switch ( $sProperty ) {
+		switch ( $key ) {
 
 			case 'lic_expired':
-				if ( is_null( $mVal ) ) {
-					$mVal = ( new \EDD_SL_License( $this->license_id ) )->is_expired();
-					$this->lic_expired = $mVal;
+				if ( is_null( $value ) ) {
+					$value = ( new \EDD_SL_License( $this->license_id ) )->is_expired();
+					$this->lic_expired = $value;
 				}
 				break;
 
@@ -39,6 +31,6 @@ class EddActivationVO {
 				break;
 		}
 
-		return $mVal;
+		return $value;
 	}
 }

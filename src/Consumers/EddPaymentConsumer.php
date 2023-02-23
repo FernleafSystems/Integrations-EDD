@@ -1,27 +1,17 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
 trait EddPaymentConsumer {
 
-	/**
-	 * @var \EDD_Payment
-	 */
-	private $oEddPayment;
+	private ?\EDD_Payment $eddPayment = null;
 
-	/**
-	 * @return \EDD_Payment
-	 */
-	public function getEddPayment() {
-		return $this->oEddPayment;
+	public function getEddPayment() :?\EDD_Payment {
+		return $this->eddPayment;
 	}
 
-	/**
-	 * @param \EDD_Payment $oEddPayment
-	 * @return $this
-	 */
-	public function setEddPayment( $oEddPayment ) {
-		$this->oEddPayment = $oEddPayment;
+	public function setEddPayment( \EDD_Payment $payment ) :self {
+		$this->eddPayment = $payment;
 		return $this;
 	}
 }

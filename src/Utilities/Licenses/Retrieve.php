@@ -13,48 +13,35 @@ class Retrieve {
 	/**
 	 * @var array
 	 */
-	private $aLastResults;
+	private array $lastResults = [];
 
-	/**
-	 * @var array
-	 */
-	private $aStatuses;
+	private array $statuses = [];
 
-	/**
-	 * @return array
-	 */
-	public function getLastResults() {
-		return is_array( $this->aLastResults ) ? $this->aLastResults : [];
+	public function getLastResults() :array {
+		return $this->lastResults;
 	}
 
-	/**
-	 * @return $this
-	 */
-	public function reset() {
-		$this->aLastResults = [];
+	public function reset() :self {
+		$this->lastResults = [];
 		return $this;
 	}
 
 	/**
-	 * @param array $aExtraParams
 	 * @return \EDD_SL_License[]
 	 */
-	public function retrieve( $aExtraParams = [] ) {
+	public function retrieve( array $extraParams = [] ) :array {
 		return array_map(
-			function ( $nLicenseId ) {
-				return new \EDD_SL_License( $nLicenseId );
-			},
-			$this->runQuery( $aExtraParams )
+			fn( $licID ) => new \EDD_SL_License( $licID ),
+			$this->runQuery( $extraParams )
 		);
 	}
 
 	/**
-	 * @param array $aExtraParams
 	 * @return int[] - license IDs
 	 */
-	public function runQuery( $aExtraParams = [] ) {
+	public function runQuery( array $extraParams = [] ) :array {
 
-		if ( !empty( $aExtraParams[ 'site_name' ] ) ) {
+		if ( !empty( $extraParams[ 'site_name' ] ) ) {
 			/**
 			 * We can't just take the License IDs as they're provided from this result.
 			 * The reason being that this query doesn't take into consideration
@@ -62,109 +49,81 @@ class Retrieve {
 			 * license could be expired, disabled etc. So we grab the IDs and send
 			 * them along.
 			 */
-			$aPossibleIds = $this->runQueryForSite( $aExtraParams[ 'site_name' ] );
-			if ( !empty( $aPossibleIds ) ) {
-				$aExtraParams[ 'id' ] = $aPossibleIds;
+			$possibleIds = $this->runQueryForSite( $extraParams[ 'site_name' ] );
+			if ( !empty( $possibleIds ) ) {
+				$extraParams[ 'id' ] = $possibleIds;
 			}
-			unset( $aExtraParams[ 'site_name' ] );
+			unset( $extraParams[ 'site_name' ] );
 		}
 
-		$aParams = array_merge(
+		$params = array_merge(
 			[
 				'status' => $this->getStatusesForQuery(),
 				'fields' => 'ids',
 			],
-			$aExtraParams
+			$extraParams
 		);
 
 		if ( !empty( $this->getEddDownload() ) ) {
-			$aParams[ 'download_id' ] = $this->getEddDownload()->get_ID();
+			$params[ 'download_id' ] = $this->getEddDownload()->get_ID();
 		}
 		if ( !empty( $this->getEddCustomer() ) ) {
-			$aParams[ 'user_id' ] = $this->getEddCustomer()->user_id;
+			$params[ 'user_id' ] = $this->getEddCustomer()->user_id;
 		}
 
-		$aIds = edd_software_licensing()->licenses_db->get_licenses( $aParams );
-		return is_array( $aIds ) ? $aIds : [];
+		return edd_software_licensing()->licenses_db->get_licenses( $params );
 	}
 
 	/**
-	 * @param string $sSiteName
 	 * @return int[] - license record IDs
 	 */
-	public function runQueryForSite( $sSiteName ) {
-		$aIds = ( new \EDD_SL_Activations_DB() )->get_activations(
-			[
-				'fields'    => 'license_id',
-				'site_name' => trailingslashit( $sSiteName ),
-				'activated' => 1,
-			]
-		);
-		return $aIds;
+	public function runQueryForSite( string $siteName ) :array {
+		$licIDs = ( new \EDD_SL_Activations_DB() )->get_activations( [
+			'fields'    => 'license_id',
+			'site_name' => trailingslashit( $siteName ),
+			'activated' => 1,
+		] );
+		return is_array( $licIDs ) ? $licIDs : [];
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function getStatusesForQuery() {
+	protected function getStatusesForQuery() :array {
 		return array_keys( array_filter( $this->getLicenseStatuses() ) );
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getLicenseStatuses() {
-		$aDefault = [
+	public function getLicenseStatuses() :array {
+		return array_merge( [
 			'active'   => true,
 			'inactive' => true,
 			'disabled' => false,
 			'expired'  => true,
-		];
-		return is_array( $this->aStatuses ) ? array_merge( $aDefault, $this->aStatuses ) : $aDefault;
+		], $this->statuses );
 	}
 
-	/**
-	 * @param bool $bInclude
-	 * @return $this
-	 */
-	public function setIncludeDisabled( $bInclude = true ) {
-		return $this->setIncludeStatus( 'disabled', $bInclude );
+	public function setIncludeDisabled( bool $include = true ) :self {
+		return $this->setIncludeStatus( 'disabled', $include );
 	}
 
-	/**
-	 * @param bool $bInclude
-	 * @return $this
-	 */
-	public function setIncludeExpired( $bInclude = true ) {
-		return $this->setIncludeStatus( 'expired', $bInclude );
+	public function setIncludeExpired( bool $include = true ) :self {
+		return $this->setIncludeStatus( 'expired', $include );
 	}
 
-	/**
-	 * @param string $sStatus
-	 * @param bool   $bInclude
-	 * @return $this
-	 */
-	public function setIncludeStatus( $sStatus, $bInclude ) {
-		$aSt = $this->getLicenseStatuses();
-		$aSt[ $sStatus ] = (bool)$bInclude;
-		return $this->setLicenseStatuses( $aSt );
+	public function setIncludeStatus( string $status, bool $include ) :self {
+		$statuses = $this->getLicenseStatuses();
+		$statuses[ $status ] = $include;
+		return $this->setLicenseStatuses( $statuses );
 	}
 
-	/**
-	 * @param array $aLicenseStatuses
-	 * @return $this
-	 */
-	protected function setLicenseStatuses( $aLicenseStatuses ) {
-		$this->aStatuses = $aLicenseStatuses;
+	protected function setLicenseStatuses( array $licenseStatuses ) :self {
+		$this->statuses = $licenseStatuses;
 		return $this;
 	}
 
 	/**
-	 * @param array $aRes
+	 * @param array $results
 	 * @return $this
 	 */
-	protected function setLastResults( $aRes ) {
-		$this->aLastResults = $aRes;
+	protected function setLastResults( array $results ) {
+		$this->lastResults = $results;
 		return $this;
 	}
 }

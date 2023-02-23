@@ -18,7 +18,7 @@ class Sites extends Retrieve {
 			if ( in_array( $oLicense->status, [ 'active', 'inactive' ] ) ) {
 				$aAssignedSites = array_merge( $aAssignedSites, $oLicense->sites );
 			}
-			else if ( $oLicense->status == 'expired' ) {
+			elseif ( $oLicense->status == 'expired' ) {
 				$aAssignedSitesExpired = array_merge( $aAssignedSitesExpired, $oLicense->sites );
 			}
 		}
@@ -33,23 +33,23 @@ class Sites extends Retrieve {
 	/**
 	 * @return string[]
 	 */
-	public function getSites() {
+	public function getSites() :array {
 		return $this->getLastResults()[ 'sites' ];
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public function getExpiredSites() {
+	public function getExpiredSites() :array {
 		return $this->getLastResults()[ 'sites_expired' ];
 	}
 
 	/**
 	 * @return string[][]
 	 */
-	public function getLastResults() {
-		$aRes = parent::getLastResults();
-		if ( empty( $aRes ) ) {
+	public function getLastResults() :array {
+		$results = parent::getLastResults();
+		if ( empty( $results ) ) {
 			$this->setLastResults( [
 				'sites'         => [],
 				'sites_expired' => [],

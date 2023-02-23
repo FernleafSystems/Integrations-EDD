@@ -3,32 +3,38 @@
 namespace FernleafSystems\Integrations\Edd\Accounting\Reconciliation\PaypalFreeagent;
 
 use FernleafSystems\ApiWrappers\Freeagent\Entities;
+use FernleafSystems\ApiWrappers\Freeagent\Entities\BankTransactions\BankTransactionVO;
+use FernleafSystems\ApiWrappers\Freeagent\Entities\Bills\BillVO;
 use FernleafSystems\Integrations\Edd\Accounting\Reconciliation\CommonEddBridge;
 use FernleafSystems\Integrations\Edd\Utilities;
-use FernleafSystems\Integrations\Freeagent\DataWrapper;
-use FernleafSystems\Integrations\Freeagent\Service\PayPal\PaypalBridge;
+use FernleafSystems\Integrations\Freeagent\DataWrapper\{
+	ChargeVO,
+	PayoutVO
+};
+use FernleafSystems\Integrations\Freeagent\Service\PayPal\{
+	PaypalBridge,
+	TransactionVO
+};
 
 class PaypalEddBridge extends PaypalBridge {
 
 	use CommonEddBridge;
 
-	const PAYMENTMETA_EXT_BANK_TXN_ID = 'icwpeddpaypalbridge_ext_bank_tx_id';
-	const PAYMENTMETA_EXT_BILL_ID = 'icwpeddpaypalbridge_ext_bill_id';
+	public const PAYMENTMETA_EXT_BANK_TXN_ID = 'icwpeddpaypalbridge_ext_bank_tx_id';
+	public const PAYMENTMETA_EXT_BILL_ID = 'icwpeddpaypalbridge_ext_bill_id';
 
 	/**
-	 * @param string $txnID a stripe txn ID
-	 * @return DataWrapper\ChargeVO
 	 * @throws \Exception
 	 */
-	public function buildChargeFromTransaction( $txnID ) {
-		$charge = parent::buildChargeFromTransaction( $txnID );
+	public function buildChargeFromTransaction( string $gatewayChargeID ) :ChargeVO {
+		$charge = parent::buildChargeFromTransaction( $gatewayChargeID );
 
-		$item = $this->getCartItemDetailsFromGatewayTxn( $txnID );
+		$item = $this->getCartItemDetailsFromGatewayTxn( $gatewayChargeID );
 
-		$sub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $txnID );
+		$sub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayChargeID );
 		if ( empty( $sub->period ) ) {
 //			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
-			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $txnID ) );
+			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $gatewayChargeID ) );
 			$period = 'year';
 		}
 		else {
@@ -46,7 +52,7 @@ class PaypalEddBridge extends PaypalBridge {
 			}
 		}
 		if ( !$sane ) {
-			throw new \Exception( 'Item cart total does not equal Stripe charge total' );
+			throw new \Exception( 'Item cart total does not equal PayPal charge total' );
 		}
 
 		$charge->item_name = $this->getCartItemName( $item );
@@ -60,7 +66,7 @@ class PaypalEddBridge extends PaypalBridge {
 		return $charge;
 	}
 
-	protected function getTxnChargeDetails( $txnID ) {
+	protected function getTxnChargeDetails( string $txnID ) :TransactionVO {
 		try {
 			$txn = $this->getTxnChargeDetailsPayPalAPI( $txnID );
 		}
@@ -71,53 +77,38 @@ class PaypalEddBridge extends PaypalBridge {
 		return $txn;
 	}
 
-	protected function getTxnChargeDetailsPayPalAPI( $txnID ) {
+	/**
+	 * @throws \Exception
+	 */
+	protected function getTxnChargeDetailsPayPalAPI( string $txnID ) :TransactionVO {
 		return ( new GetPaypalTransactionsFromPayment() )
 			->setEddPayment( ( new Utilities\GetEddPaymentFromGatewayTxnId() )->retrieve( $txnID ) )
 			->retrieve( $txnID );
 	}
 
-	/**
-	 * @param DataWrapper\PayoutVO $payout
-	 * @return int|null
-	 */
-	public function getExternalBankTxnId( $payout ) {
-		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )
+	public function getExternalBankTxnId( PayoutVO $payout ) :?string {
+		return (string)( new Utilities\GetEddPaymentFromGatewayTxnId() )
 			->retrieve( $payout->id )
 			->get_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID );
 	}
 
-	/**
-	 * @param DataWrapper\PayoutVO $oPayout
-	 * @return int|null
-	 */
-	public function getExternalBillId( $oPayout ) {
-		return ( new Utilities\GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->id )
+	public function getExternalBillId( PayoutVO $payout ) :?string {
+		return (string)( new Utilities\GetEddPaymentFromGatewayTxnId() )
+			->retrieve( $payout->id )
 			->get_meta( static::PAYMENTMETA_EXT_BILL_ID );
 	}
 
-	/**
-	 * @param DataWrapper\PayoutVO                        $oPayout
-	 * @param Entities\BankTransactions\BankTransactionVO $oBankTxn
-	 * @return $this
-	 */
-	public function storeExternalBankTxnId( $oPayout, $oBankTxn ) {
+	public function storeExternalBankTxnId( PayoutVO $payout, BankTransactionVO $bankTxn ) :self {
 		( new Utilities\GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->id )
-			->update_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID, $oBankTxn->getId() );
+			->retrieve( $payout->id )
+			->update_meta( static::PAYMENTMETA_EXT_BANK_TXN_ID, $bankTxn->getId() );
 		return $this;
 	}
 
-	/**
-	 * @param DataWrapper\PayoutVO  $oPayout
-	 * @param Entities\Bills\BillVO $oBill
-	 * @return $this
-	 */
-	public function storeExternalBillId( $oPayout, $oBill ) {
+	public function storeExternalBillId( PayoutVO $payout, BillVO $bill ) :self {
 		( new Utilities\GetEddPaymentFromGatewayTxnId() )
-			->retrieve( $oPayout->id )
-			->update_meta( static::PAYMENTMETA_EXT_BILL_ID, $oBill->getId() );
+			->retrieve( $payout->id )
+			->update_meta( static::PAYMENTMETA_EXT_BILL_ID, $bill->getId() );
 		return $this;
 	}
 }

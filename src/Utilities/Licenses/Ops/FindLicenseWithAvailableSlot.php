@@ -2,17 +2,24 @@
 
 namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\Ops;
 
-use FernleafSystems\Integrations\Edd\Utilities\Licenses\BaseLicenses;
+use FernleafSystems\Integrations\Edd\Consumers\EddCustomerConsumer;
+use FernleafSystems\Integrations\Edd\Consumers\EddDownloadConsumer;
+use FernleafSystems\Integrations\Edd\Utilities\Licenses\LicensesIterator;
 
-class FindLicenseWithAvailableSlot extends BaseLicenses {
+class FindLicenseWithAvailableSlot {
 
-	/**
-	 * @return \EDD_SL_License|null
-	 */
+	use EddCustomerConsumer;
+	use EddDownloadConsumer;
+
 	public function find() :?\EDD_SL_License {
-
 		$possible = [];
-		foreach ( $this->getLicIterator() as $lic ) {
+
+		$licIT = new LicensesIterator();
+		if ( !empty( $this->getEddCustomer() ) ) {
+			$licIT->filterByCustomer( $this->getEddCustomer()->id );
+		}
+
+		foreach ( $licIT as $lic ) {
 			if ( !$lic->is_expired() &&
 				 $lic->get_download()->get_ID() == $this->getEddDownload()->get_ID() &&
 				 $lic->activation_count < $lic->activation_limit ) {

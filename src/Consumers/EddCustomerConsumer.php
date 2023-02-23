@@ -1,20 +1,17 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace FernleafSystems\Integrations\Edd\Consumers;
 
 trait EddCustomerConsumer {
 
-	/**
-	 * @var \EDD_Customer
-	 */
-	private $oEddCustomer;
+	private ?\EDD_Customer $eddCustomer;
 
 	public function getEddCustomer() :?\EDD_Customer {
-		return $this->oEddCustomer;
+		return $this->eddCustomer;
 	}
 
-	public function setEddCustomer( \EDD_Customer $oEddCustomer ) :self {
-		$this->oEddCustomer = $oEddCustomer;
+	public function setEddCustomer( \EDD_Customer $customer ) :self {
+		$this->eddCustomer = $customer;
 		return $this;
 	}
 }

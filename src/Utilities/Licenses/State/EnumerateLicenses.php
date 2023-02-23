@@ -8,10 +8,10 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\State;
 class EnumerateLicenses extends BaseState {
 
 	protected function run() {
-		$aLicenses = [];
-		foreach ( $this->getLicIterator() as $oLicense ) {
-			$aLicenses[] = $oLicense;
+		$licenses = [];
+		foreach ( $this->getLicenseIterator() as $lic ) {
+			$licenses[] = $lic;
 		}
-		$this->licenses = $aLicenses;
+		$this->licenses = $licenses;
 	}
 }

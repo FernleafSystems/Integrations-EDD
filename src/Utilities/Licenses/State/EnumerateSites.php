@@ -12,13 +12,13 @@ class EnumerateSites extends BaseState {
 
 		$assignedSites = [];
 		$assignedSitesExpired = [];
-		foreach ( $this->getLicIterator() as $licesnse ) {
-			if ( !empty( $licesnse ) ) {
-				if ( $licesnse->is_expired() == 'expired' ) {
-					$assignedSitesExpired = array_merge( $assignedSitesExpired, $licesnse->sites );
+		foreach ( $this->getLicenseIterator() as $lic ) {
+			if ( !empty( $lic ) ) {
+				if ( $lic->is_expired() == 'expired' ) {
+					$assignedSitesExpired = array_merge( $assignedSitesExpired, $lic->sites );
 				}
-				elseif ( in_array( $licesnse->status, [ 'active', 'inactive' ] ) ) {
-					$assignedSites = array_merge( $assignedSites, $licesnse->sites );
+				elseif ( in_array( $lic->status, [ 'active', 'inactive' ] ) ) {
+					$assignedSites = array_merge( $assignedSites, $lic->sites );
 				}
 			}
 		}

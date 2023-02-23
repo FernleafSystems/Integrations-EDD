@@ -6,14 +6,11 @@ class GetSubscriptionsFromGatewayTxnId {
 
 	/**
 	 * TODO: This is still problematic if you have multiple subscriptions in a single purchase
-	 * @param string $txnId
-	 * @return \EDD_Subscription
 	 */
-	public function retrieve( $txnId ) {
-		$subs = ( new \EDD_Subscriptions_DB() )
-			->get_subscriptions( [
-				'transaction_id' => $txnId
-			] );
+	public function retrieve( string $txnId ) :?\EDD_Subscription {
+		$subs = ( new \EDD_Subscriptions_DB() )->get_subscriptions( [
+			'transaction_id' => $txnId
+		] );
 
 		/**
 		 * For renewals, there is no obvious link between the TxnID and the Sub. So we need to

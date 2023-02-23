@@ -13,7 +13,7 @@ class ActivationCounts extends BaseState {
 
 	protected function run() {
 
-		foreach ( $this->getLicIterator() as $lic ) {
+		foreach ( $this->getLicenseIterator() as $lic ) {
 
 			if ( empty( $lic ) || $lic->status === 'disabled' ) {
 				continue;

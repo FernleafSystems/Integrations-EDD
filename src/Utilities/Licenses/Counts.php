@@ -18,19 +18,19 @@ class Counts extends Retrieve {
 		$nTotalActivationLimitExpired = 0;
 		$bUnlimited = false;
 
-		foreach ( $this->retrieve() as $oLicense ) {
+		foreach ( $this->retrieve() as $lic ) {
 
-			if ( $oLicense->is_expired() ) {
-				$nTotalActivationsExpired += $oLicense->activation_count;
-				$nTotalActivationLimitExpired += $oLicense->license_limit();
+			if ( $lic->is_expired() ) {
+				$nTotalActivationsExpired += $lic->activation_count;
+				$nTotalActivationLimitExpired += $lic->license_limit();
 			}
 			else {
-				$nTotalActivationsNonExpired += $oLicense->activation_count;
-				if ( $oLicense->activation_limit <= 0 ) {
+				$nTotalActivationsNonExpired += $lic->activation_count;
+				if ( $lic->activation_limit <= 0 ) {
 					$bUnlimited = true;
 				}
 				else {
-					$nTotalActivationLimit += $oLicense->license_limit();
+					$nTotalActivationLimit += $lic->license_limit();
 				}
 			}
 		}
@@ -80,10 +80,7 @@ class Counts extends Retrieve {
 		return $this->isUnlimited() ? PHP_INT_MAX : ( $this->getActivationLimit() - $this->getAssigned() );
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function hasAvailable() {
+	public function hasAvailable() :bool {
 		return $this->isUnlimited() || $this->getUnassigned() > 0;
 	}
 

@@ -15,7 +15,7 @@ class Retrieve {
 			'activated' => $activated ? 1 : 0,
 		] );
 		return array_map(
-			fn( $aAct ) => ( new EddActivationVO() )->applyFromArray( (array)$aAct ),
+			fn( $act ) => ( new EddActivationVO() )->applyFromArray( (array)$act ),
 			is_array( $acts ) ? $acts : []
 		);
 	}
