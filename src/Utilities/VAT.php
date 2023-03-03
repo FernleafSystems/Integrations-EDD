@@ -19,7 +19,7 @@ class VAT {
 		$vatNumber = $payment->get_meta( self::META_VAT_ID );
 		if ( empty( $vatNumber ) ) {
 			$userInfo = edd_get_payment_meta_user_info( $payment->ID );
-			$vatNumber = is_string( $userInfo[ self::META_LEGACY_VAT_ID ] ?? '' ) ? $userInfo[ self::META_LEGACY_VAT_ID ] : '';
+			$vatNumber = is_string( $userInfo[ self::META_LEGACY_VAT_ID ] ?? null ) ? $userInfo[ self::META_LEGACY_VAT_ID ] : '';
 
 			// No sign of any VAT, so we look to the parent payment if it's available.
 			if ( empty( $vatNumber ) && Payment::IsRenewal( $payment ) && !empty( $payment->parent_payment ) ) {
