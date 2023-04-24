@@ -35,8 +35,8 @@ class ActivationCounts extends BaseState {
 			}
 			elseif ( $lic->is_expired() ) {
 
-				$this->assigned_expired += $lic->activation_count;
-				$this->limit_expired += $lic->license_limit();
+				$this->assigned_expired += (int)$lic->activation_count;
+				$this->limit_expired += (int)$lic->license_limit();
 			}
 			else {
 				$this->assigned += $lic->activation_count;
@@ -44,7 +44,7 @@ class ActivationCounts extends BaseState {
 					$this->unlimited = true;
 				}
 				else {
-					$this->limit += $lic->license_limit();
+					$this->limit += (int)$lic->license_limit();
 				}
 			}
 		}
