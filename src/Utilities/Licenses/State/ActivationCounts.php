@@ -11,6 +11,21 @@ namespace FernleafSystems\Integrations\Edd\Utilities\Licenses\State;
  */
 class ActivationCounts extends BaseState {
 
+	public function __get( string $key ) {
+		$value = parent::__get( $key );
+		switch ( $key ) {
+			case 'assigned':
+			case 'assigned_expired':
+			case 'limit':
+			case 'limit_expired':
+				$value = (int)$value;
+				break;
+			default:
+				break;
+		}
+		return $value;
+	}
+
 	protected function run() {
 
 		foreach ( $this->getLicenseIterator() as $lic ) {
