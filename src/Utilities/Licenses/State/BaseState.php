@@ -16,7 +16,7 @@ abstract class BaseState extends DynPropertiesClass {
 	use EddDownloadConsumer;
 	use OneTimeExecute;
 
-	public function __get( $key ) {
+	public function __get( string $key ) {
 		$this->execute();
 		return parent::__get( $key );
 	}
