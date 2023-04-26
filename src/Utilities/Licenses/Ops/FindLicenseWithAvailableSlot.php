@@ -21,6 +21,7 @@ class FindLicenseWithAvailableSlot {
 
 		foreach ( $licIT as $lic ) {
 			if ( !$lic->is_expired() &&
+				 $lic->status !== 'disabled' &&
 				 $lic->get_download()->get_ID() == $this->getEddDownload()->get_ID() &&
 				 $lic->activation_count < $lic->activation_limit ) {
 				$possible[] = $lic;
