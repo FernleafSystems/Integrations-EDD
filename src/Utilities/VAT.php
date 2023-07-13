@@ -9,10 +9,12 @@ class VAT {
 	private const META_LEGACY_VAT_ID = 'vat_number';
 	private const META_LEGACY_VAT_COMPANY = 'company';
 	public const META_VAT_ID = '_edd_payment_vat_number';
-	public const META_META_VAT_COMPANY = '_edd_payment_vat_company_name';
-	public const META_META_VAT_ADDRESS = '_edd_payment_vat_company_address';
+	public const META_VAT_COMPANY = '_edd_payment_vat_company_name';
+	public const META_VAT_ADDRESS = '_edd_payment_vat_company_address';
 	public const META_VAT_ID_VALID = '_edd_payment_vat_number_valid';
 	public const META_VAT_ID_REVERSE_CHARGE = '_edd_payment_vat_reverse_charged';
+	public const META_META_VAT_COMPANY = '_edd_payment_vat_company_name';
+	public const META_META_VAT_ADDRESS = '_edd_payment_vat_company_address';
 
 	public static function VatNumberFromPayment( \EDD_Payment $payment ) :string {
 
