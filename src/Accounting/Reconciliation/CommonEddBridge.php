@@ -42,10 +42,11 @@ trait CommonEddBridge {
 			->create();
 	}
 
+	/**
+	 * @throws \Exception
+	 */
 	public function getFreeagentContactId( ChargeVO $charge ) :?int {
-		return $this->getFreeagentContactIdFromEddPayment(
-			$this->getEddPaymentFromCharge( $charge )
-		);
+		return $this->getFreeagentContactIdFromEddPayment( $this->getEddPaymentFromCharge( $charge ) );
 	}
 
 	/**
@@ -62,9 +63,8 @@ trait CommonEddBridge {
 	 * @throws \Exception
 	 */
 	public function createFreeagentInvoiceFromChargeId( string $gatewayTxnID ) :?Invoices\InvoiceVO {
-		return $this->createFreeagentInvoiceFromEddPaymentCartItem(
-			$this->getCartItemDetailsFromGatewayTxn( $gatewayTxnID )
-		);
+		$cartItem = $this->getCartItemDetailsFromGatewayTxn( $gatewayTxnID );
+		return empty( $cartItem ) ? null : $this->createFreeagentInvoiceFromEddPaymentCartItem( $cartItem );
 	}
 
 	/**
@@ -74,10 +74,11 @@ trait CommonEddBridge {
 	public function createFreeagentInvoiceFromEddPaymentCartItem( CartItemVo $cartItem ) :?Invoices\InvoiceVO {
 		$inv = null;
 
-		$txnID = ( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $cartItem );
-		$charge = $this->buildChargeFromTransaction( $txnID );
+		$charge = $this->buildChargeFromTransaction(
+			( new Utilities\GetTransactionIdFromCartItem() )->retrieve( $cartItem )
+		);
 
-		$invoiceID = $this->getFreeagentInvoiceId( $charge );
+		$invoiceID = $charge->local_payment_id > 0 ? $this->getFreeagentInvoiceId( $charge ) : null;
 
 		if ( !empty( $invoiceID ) ) {
 			$inv = ( new Invoices\Retrieve() )
@@ -95,7 +96,7 @@ trait CommonEddBridge {
 		}
 
 		if ( !empty( $inv ) && $inv->isStatusDraft() ) {
-			sleep( 15 );
+			sleep( 5 );
 			( new Invoices\MarkAs() )
 				->setConnection( $this->getConnection() )
 				->setEntityId( $inv->getId() )
@@ -115,7 +116,7 @@ trait CommonEddBridge {
 	 * @throws \Exception
 	 */
 	public function createFreeagentInvoicesFromEddPayment( \EDD_Payment $payment ) :array {
-		return array_filter( array_map(
+		return \array_filter( \array_map(
 			fn( $txnID ) => $this->createFreeagentInvoiceFromChargeId( $txnID ),
 			( new Utilities\GetTransactionIdsFromPayment() )->retrieve( $payment )
 		) );
@@ -128,15 +129,15 @@ trait CommonEddBridge {
 		return empty( $name ) ? $item->name : $item->name.': '.$name;
 	}
 
-	/**
-	 * @throws \Exception
-	 */
-	protected function getCartItemDetailsFromGatewayTxn( string $gatewayTxnId ) :CartItemVo {
+	protected function getCartItemDetailsFromGatewayTxn( string $gatewayTxnId ) :?CartItemVo {
 		$items = ( new Utilities\GetCartItemsFrom() )->transactionId( $gatewayTxnId );
-		if ( count( $items ) != 1 ) { // TODO - if we offer non-subscription items!
+		if ( \count( $items ) === 0 ) { // TODO - if we offer non-subscription items!
+			error_log( sprintf( 'Found ZERO cart items for a Stripe Txn "%s"', $gatewayTxnId ) );
+		}
+		elseif ( \count( $items ) > 1 ) { // TODO - if we offer non-subscription items!
 			error_log( sprintf( 'Found more than 1 cart item for a Stripe Txn "%s"', $gatewayTxnId ) );
 		}
-		return array_pop( $items );
+		return \array_pop( $items );
 	}
 
 	protected function getEddCustomerFromEddPayment( \EDD_Payment $payment ) :\EDD_Customer {
@@ -170,7 +171,7 @@ trait CommonEddBridge {
 		if ( !empty( $payment ) ) {
 			$IDs = $payment->get_meta( self::KEY_FREEAGENT_INVOICE_IDS );
 		}
-		return is_array( $IDs ) ? $IDs : [];
+		return \is_array( $IDs ) ? $IDs : [];
 	}
 
 	/**
@@ -209,8 +210,11 @@ trait CommonEddBridge {
 		return $country;
 	}
 
+	/**
+	 * @throws \Exception
+	 */
 	protected function isChargeInEcRegion( ChargeVO $charge ) :bool {
-		return in_array( $this->getChargeCountry( $charge ), Utilities\Countries::EC_COUNTRIES );
+		return \in_array( $this->getChargeCountry( $charge ), Utilities\Countries::EC_COUNTRIES );
 	}
 
 	protected function getTaxCountriesRates() :array {
@@ -227,11 +231,11 @@ trait CommonEddBridge {
 	 * @throws \Exception
 	 */
 	protected function setupChargeEcStatus( ChargeVO $charge ) {
-		$p = $this->getEddPaymentFromCharge( $charge );
-		$hasVatNumber = Utilities\VAT::VatNumberFromPayment( $p );
 
 		if ( $charge->item_taxrate == 0 ) {
-			if ( $this->isChargeInEcRegion( $charge ) && $hasVatNumber ) {
+			$vatNumber = $charge->local_payment_id > 0 ?
+				Utilities\VAT::VatNumberFromPayment( $this->getEddPaymentFromCharge( $charge ) ) : '';
+			if ( !empty( $vatNumber ) && $this->isChargeInEcRegion( $charge ) ) {
 				$charge->ec_status = Constants::VAT_STATUS_REVERSE_CHARGE;
 			}
 			else {

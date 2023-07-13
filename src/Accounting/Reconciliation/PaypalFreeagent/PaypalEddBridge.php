@@ -30,37 +30,44 @@ class PaypalEddBridge extends PaypalBridge {
 		$charge = parent::buildChargeFromTransaction( $gatewayChargeID );
 
 		$item = $this->getCartItemDetailsFromGatewayTxn( $gatewayChargeID );
-
-		$sub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayChargeID );
-		if ( empty( $sub->period ) ) {
-//			throw new \Exception( sprintf( 'Subscription lookup has an empty "period" for Txn: %s', $sTxnID ) );
-			error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $gatewayChargeID ) );
+		if ( empty( $item ) ) {
 			$period = 'year';
+			$charge->item_name = 'Placeholder item name';
+			$charge->item_quantity = 1;
+			$charge->item_subtotal = $charge->amount_gross;
+			$charge->item_taxrate = 0;
+			$charge->local_payment_id = 0;
 		}
 		else {
-			$period = $sub->period;
-		}
+			$sub = ( new Utilities\GetSubscriptionsFromGatewayTxnId() )->retrieve( $gatewayChargeID );
+			if ( empty( $sub->period ) ) {
+				error_log( sprintf( 'Default to "year" as subscription has an empty "period" for Txn: %s', $gatewayChargeID ) );
+				$period = 'year';
+			}
+			else {
+				$period = $sub->period;
 
-		$period = ucfirst( strtolower( $period.'s' ) ); // e.g. year -> Years
+				// Price Sanity Check
+				$sane = false;
+				foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
+					if ( (float)$price === (float)$charge->amount_gross ) {
+						$sane = true;
+						break;
+					}
+				}
+				if ( !$sane ) {
+					throw new \Exception( 'Item cart total does not equal PayPal charge total' );
+				}
 
-		// Sanity
-		$sane = false;
-		foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
-			if ( (float)$price === (float)$charge->amount_gross ) {
-				$sane = true;
-				break;
+				$charge->item_name = $this->getCartItemName( $item );
+				$charge->item_quantity = $item->quantity;
+				$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
+				$charge->item_taxrate = $item->getTaxRate();
+				$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
 			}
 		}
-		if ( !$sane ) {
-			throw new \Exception( 'Item cart total does not equal PayPal charge total' );
-		}
 
-		$charge->item_name = $this->getCartItemName( $item );
-		$charge->item_quantity = $item->quantity;
-		$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
-		$charge->item_taxrate = $item->getTaxRate();
-		$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
-		$charge->setItemPeriodType( $period );
+		$charge->setItemPeriodType( \ucfirst( \strtolower( $period.'s' ) ) ); // e.g. year -> Years
 		$this->setupChargeEcStatus( $charge );
 
 		return $charge;
