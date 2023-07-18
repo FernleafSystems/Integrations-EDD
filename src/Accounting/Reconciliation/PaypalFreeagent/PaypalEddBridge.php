@@ -64,11 +64,11 @@ class PaypalEddBridge extends PaypalBridge {
 				$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
 				$charge->item_taxrate = $item->getTaxRate();
 				$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
+				$this->setupChargeEcStatus( $charge );
 			}
 		}
 
-		$charge->setItemPeriodType( \ucfirst( \strtolower( $period.'s' ) ) ); // e.g. year -> Years
-		$this->setupChargeEcStatus( $charge );
+		$charge->item_type = $period;
 
 		return $charge;
 	}
