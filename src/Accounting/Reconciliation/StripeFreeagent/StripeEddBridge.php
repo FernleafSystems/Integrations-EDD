@@ -58,7 +58,7 @@ class StripeEddBridge extends StripeBridge {
 			}
 		}
 
-		$charge->setItemPeriodType( $period );
+		$charge->item_type = $period;
 
 		return $charge;
 	}
