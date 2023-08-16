@@ -32,30 +32,30 @@ class StripeEddBridge extends StripeBridge {
 			}
 			else {
 				$period = $sub->period;
-
-				// Price Sanity Check
-				$sane = false;
-				foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
-					if ( \bccomp( (string)$price, (string)$charge->amount_gross )
-						 || (float)$price === (float)$charge->amount_gross
-					) {
-						$sane = true;
-						break;
-					}
-				}
-				if ( !$sane ) {
-					throw new \Exception( sprintf( 'Item cart total does not equal Stripe charge total for txn %s', $gatewayChargeID ) );
-				}
-
-				$charge->amount_discount = $item->discount ?? 0;
-
-				$charge->item_name = $this->getCartItemName( $item );
-				$charge->item_quantity = $item->quantity;
-				$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
-				$charge->item_taxrate = $item->getTaxRate();
-				$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
-				$this->setupChargeEcStatus( $charge );
 			}
+
+			// Price Sanity Check
+			$sane = false;
+			foreach ( [ $item->getPreTaxSubtotal(), $item->price ] as $price ) {
+				if ( \bccomp( (string)$price, (string)$charge->amount_gross )
+					 || (float)$price === (float)$charge->amount_gross
+				) {
+					$sane = true;
+					break;
+				}
+			}
+			if ( !$sane ) {
+				throw new \Exception( sprintf( 'Item cart total does not equal Stripe charge total for txn %s', $gatewayChargeID ) );
+			}
+
+			$charge->amount_discount = $item->discount ?? 0;
+
+			$charge->item_name = $this->getCartItemName( $item );
+			$charge->item_quantity = $item->quantity;
+			$charge->item_subtotal = $item->getPreTaxPerItemSubtotal();
+			$charge->item_taxrate = $item->getTaxRate();
+			$charge->local_payment_id = $this->getEddPaymentFromCharge( $charge )->ID;
+			$this->setupChargeEcStatus( $charge );
 		}
 
 		$charge->item_type = $period;
