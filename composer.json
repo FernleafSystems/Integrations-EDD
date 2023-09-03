@@ -19,7 +19,7 @@
   "repositories":      [
   ],
   "require":           {
-    "php":                                    ">=7.4",
+    "php":                                    ">=8.2",
     "fernleafsystems/integrations-freeagent": "^2.1",
     "fernleafsystems/wordpress-services":     "^3.0",
     "ext-json":                               "*",
