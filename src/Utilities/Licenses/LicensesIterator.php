@@ -23,6 +23,10 @@ class LicensesIterator extends CommonEntityIterator {
 		return $this->setCustomQueryFilter( 'customer_id', $customerID );
 	}
 
+	public function filterByDownloadIDs( array $downloadIDs ) :self {
+		return $this->setCustomQueryFilter( 'download_id', $downloadIDs );
+	}
+
 	/**
 	 * @return \EDD_SL_License[]
 	 */

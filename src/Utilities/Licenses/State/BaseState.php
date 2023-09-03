@@ -26,6 +26,9 @@ abstract class BaseState extends DynPropertiesClass {
 		if ( !empty( $this->getEddCustomer() ) ) {
 			$licIT->filterByCustomer( $this->getEddCustomer()->id );
 		}
+		if ( !empty( $this->getEddDownload() ) ) {
+			$licIT->filterByDownloadIDs( [ $this->getEddDownload()->ID ] );
+		}
 		return $licIT;
 	}
 }
