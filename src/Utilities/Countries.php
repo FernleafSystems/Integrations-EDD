@@ -35,11 +35,11 @@ class Countries {
 	];
 
 	public static function TaxedCountries() :array {
-		$countries = array_filter( array_map(
+		$countries = \array_filter( \array_map(
 			fn( $countryData ) => $countryData[ 'country' ],
 			edd_get_tax_rates()
 		) );
-		asort( $countries );
-		return array_values( $countries );
+		\asort( $countries );
+		return \array_values( $countries );
 	}
 }

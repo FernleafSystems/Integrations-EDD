@@ -194,20 +194,31 @@ trait CommonEddBridge {
 	}
 
 	/**
+	 * @return string - ISO2 code
 	 * @throws \Exception
 	 */
 	protected function getChargeCountry( ChargeVO $charge ) :string {
 		$payment = $this->getEddPaymentFromCharge( $charge );
-		$country = $payment->address[ 'country' ];
-		if ( empty( $country ) ) {
+
+		$code = $payment->address[ 'country' ];
+		if ( empty( $code ) ) {
 			if ( $payment->parent_payment > 0 ) {
-				$country = edd_get_payment( $payment->parent_payment )->address[ 'country' ];
+				$code = edd_get_payment( $payment->parent_payment )->address[ 'country' ];
 			}
 			else {
-				$country = 'US';
+				$code = 'US';
 			}
 		}
-		return $country;
+
+		// If tax has been applied, tax country takes precedence.
+		if ( $payment->tax > 0 ) {
+			$taxRate = $payment->order->get_tax_rate_object();
+			if ( $taxRate && $taxRate->scope === 'country' && !empty( $taxRate->name ) ) {
+				$code = $taxRate->name;
+			}
+		}
+
+		return $code;
 	}
 
 	/**
@@ -230,23 +241,28 @@ trait CommonEddBridge {
 	/**
 	 * @throws \Exception
 	 */
-	protected function setupChargeEcStatus( ChargeVO $charge ) {
+	protected function setupChargeEcStatus( ChargeVO $c ) :void {
 
-		if ( $charge->item_taxrate == 0 ) {
-			$vatNumber = $charge->local_payment_id > 0 ?
-				Utilities\VAT::VatNumberFromPayment( $this->getEddPaymentFromCharge( $charge ) ) : '';
-			if ( !empty( $vatNumber ) && $this->isChargeInEcRegion( $charge ) ) {
-				$charge->ec_status = Constants::VAT_STATUS_REVERSE_CHARGE;
+		if ( $c->item_taxrate == 0 ) {
+			$vatNumber = $c->local_payment_id > 0 ?
+				Utilities\VAT::VatNumberFromPayment( $this->getEddPaymentFromCharge( $c ) ) : '';
+			if ( !empty( $vatNumber ) && $this->isChargeInEcRegion( $c ) ) {
+				$c->ec_status = Constants::VAT_STATUS_REVERSE_CHARGE;
 			}
 			else {
-				$charge->ec_status = Constants::VAT_STATUS_UK_NON_EC;
+				$c->ec_status = Constants::VAT_STATUS_UK_NON_EC;
 			}
 		}
-		elseif ( $this->isChargeInEcRegion( $charge ) ) {
-			$charge->ec_status = Constants::VAT_STATUS_EC_MOSS;
+		elseif ( $this->isChargeInEcRegion( $c ) ) {
+			$c->ec_status = Constants::VAT_STATUS_EC_MOSS;
 		}
 		else {
-			$charge->ec_status = Constants::VAT_STATUS_UK_NON_EC;
+			$c->ec_status = Constants::VAT_STATUS_UK_NON_EC;
+		}
+
+		if ( !isset( $c->country )
+			 && \in_array( $c->ec_status, [ Constants::VAT_STATUS_EC_MOSS, Constants::VAT_STATUS_REVERSE_CHARGE ] ) ) {
+			$c->country = edd_get_country_name( $this->getChargeCountry( $c ) );
 		}
 	}
 }
