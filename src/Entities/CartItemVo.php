@@ -35,7 +35,13 @@ class CartItemVo extends DynPropertiesClass {
 	 */
 	public function getTaxRate() {
 		$rate = $this->tax > 0 ? $this->tax/$this->getPreTaxSubtotal() : 0;
-		return $rate == 0 ? $rate : round( $rate, 3 );
+		if ( $rate > 0 ) {
+			$rate = \round( $rate, 3 );
+			if ( !\preg_match('#[0,5]$#', (string)$rate ) ) {
+				$rate = \round( $rate, 2 );
+			}
+		}
+		return $rate;
 	}
 
 	/**
