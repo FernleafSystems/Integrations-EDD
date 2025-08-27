@@ -213,8 +213,8 @@ trait CommonEddBridge {
 		// If tax has been applied, tax country takes precedence.
 		if ( $payment->tax > 0 ) {
 			$taxRate = $payment->order->get_tax_rate_object();
-			if ( $taxRate && $taxRate->scope === 'country' && !empty( $taxRate->name ) ) {
-				$code = $taxRate->name;
+			if ( $taxRate && $taxRate->scope === 'country' && !empty( $taxRate->country ) ) {
+				$code = $taxRate->country;
 			}
 		}
 
